@@ -86,9 +86,15 @@ def decrypt():
     else:
         return render_template("decrypt.html")
 
-@app.route("/generate")
+
+@app.route("/generate", methods=["POST", "GET"])
 def generate_keys():
-    return render_template("generate.html")
+    if request.method == "POST":
+        path = "text.txt"
+        return render_template('download.html', header="Decrypred file", path_download=path)
+    else:
+        return render_template("generate.html")
+    # return render_template("generate.html")
 
 
 if __name__ == "__main__":
