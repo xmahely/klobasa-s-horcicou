@@ -27,7 +27,6 @@ def allowed_file(file, extension):
 
 @app.route("/download/<path>")
 def download_file(path):
-    print(path)
     return send_file(path, as_attachment=True)
 
 
@@ -68,8 +67,8 @@ def encrypt():
             f.write(decrypted_text_string)
             f.close()
             # path = os.path.join(UPLOAD_FOLDER, 'encrypted')
+            # skuste sa pohrat s tymito cestami, aby to napr. islo z priecinku tmp
             path = "encrypted.txt"
-            # path = "test.txt"
             return render_template('download.html', header="Encrypted file", path_download=path)
     else:
         return render_template("encrypt.html")
@@ -112,6 +111,7 @@ def decrypt():
             f.write(decrypted_text_string)
             f.close()
             # path = os.path.join(UPLOAD_FOLDER, 'encrypted')
+            # skuste sa pohrat s tymito cestami, aby to napr. islo z priecinku tmp
             path = "decrypted.txt"
             return render_template('download.html', header="Decrypted file", path_download=path)
     else:
