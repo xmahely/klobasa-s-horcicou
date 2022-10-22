@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Decrypt file{% endblock %}
+{% block content %}
+    {% for message in get_flashed_messages() %}
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+          </button>
+          <strong>Warning!</strong>{{message}}
+        </div>
+    {% endfor %}
+    <div class="container-fluid mx-auto">
+        <div class="row d-flex justify-content-center">
+            <div class="col-xl-7 col-lg-8 col-md-9 col-11 text-center">
+                <div class="p-5">
+                     <h1>Decrypt your file</h1>
+                </div>
+                <form action="#" method="post" class="was-validated" enctype="multipart/form-data">
+                    <div class="mb-3">
+                      <label for="private_key" class="form-label">Private key (.pem) :</label>
+                      <input class="form-control" type="file" id="private_key" name ="private_key" required>
+                        <div class="valid-feedback">
+                          Looks good!
+                         </div>
+                         <div class="invalid-feedback">
+                            Please upload your private key.
+                         </div>
+                    </div>
+                    <div class="mb-3">
+                      <label for="text_file" class="form-label">File (.txt) :</label>
+                      <input class="form-control" type="file" id="text_file" name="text_file" required>
+                         <div class="valid-feedback">
+                          Looks good!
+                        </div>
+                        <div class="invalid-feedback">
+                            Please upload your file.
+                         </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="row justify-content-center">
+                            <div class="form-group col-sm-6">
+                                <button class="btn btn-outline-secondary" type="submit">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        $('.alert').alert()
+      })
+    </script>
+{% endblock %}
