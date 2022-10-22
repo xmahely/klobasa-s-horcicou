@@ -1,2 +1,1 @@
-Nekopíruj si priečinok venv, ale si sprav asi nejaký lokalálny eviroment pre python, na serveri je verzia 3.6, ale asi by nemal byť veľký prúser keď si dáš inú verziu, neviem.
-Ďalej si naištaluj flask -> pip install flask
+Spravi si enviroment pre python, najlepšie verzia 3.6 ale asi by to nemalo robiť problém keď bude iná.
