@@ -14,7 +14,7 @@ def read_private_key(file):
         return False
     else:
         try:
-            with open(filename, "rb") as key_file:
+            with open(path, "rb") as key_file:
                 privateKey = serialization.load_pem_private_key(
                     key_file.read(),
                     password=None,
