@@ -7,24 +7,39 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.fernet import Fernet
 import base64
 import os
+import fire
 
 
 def base64Encoding(input):
-  dataBase64 = base64.b64encode(input)
-  dataBase64P = dataBase64.decode("UTF-8")
-  return dataBase64P
+    dataBase64 = base64.b64encode(input)
+    dataBase64P = dataBase64.decode("UTF-8")
+    return dataBase64P
 
 
 def base64Decoding(input):
     return base64.decodebytes(input.encode("ascii"))
 
 
+def open_file(name):
+    with open(name, 'r') as f:
+        text = f.read()
+    return text
+
+
+def create_file(name, content, opt=None):
+
+    if opt is not None:
+        name = name + "_" + opt
+    with open(name, 'w') as f:
+        f.write(content)
+    return
+
+
 def generate_random_key():
     return Fernet.generate_key()
 
 
-def generate_rsa_pair():
-
+def rsa():
     keygen = RSA.generate_private_key(
         public_exponent=65537,
         key_size=2048
@@ -41,7 +56,10 @@ def generate_rsa_pair():
         format=serialization.PublicFormat.PKCS1
     )
 
-    return pem_private_key.decode(), pem_public_key.decode()
+    create_file("id_rsa_public.pub", pem_public_key.decode())
+    create_file("id_rsa.pem", pem_private_key.decode())
+
+    return
 
 
 def AES_encrypt(input, key):
@@ -56,7 +74,9 @@ def AES_decrypt(input, nonce, auth, key):
     return decrypted
 
 
-def encrypt_file(file_text, public_key):
+def encrypt(name, pub):
+    public_key = read_public_key(pub)
+    file_text = open_file(name)
 
     symmetric_key = generate_random_key()
     fernet = Fernet(symmetric_key)
@@ -77,11 +97,15 @@ def encrypt_file(file_text, public_key):
     encrypted, auth, nonce = AES_encrypt(output_header, aes_key)
 
     output = base64Encoding(aes_key) + "-----" + base64Encoding(auth) \
-             + "-----"+ base64Encoding(nonce) + "-----" + base64Encoding(encrypted)
-    return output
+             + "-----" + base64Encoding(nonce) + "-----" + base64Encoding(encrypted)
+
+    create_file(name, output, "enc")
+    return
 
 
-def decrypt_file(file_text, private_key):
+def decrypt(name, pem):
+    private_key = read_private_key(pem)
+    file_text = open_file(name)
 
     tmp = file_text.split("-----")
     aes_key = base64Decoding(tmp[0])
@@ -91,7 +115,7 @@ def decrypt_file(file_text, private_key):
 
     del tmp
 
-    result = AES_decrypt(text,nonce,auth,aes_key)
+    result = AES_decrypt(text, nonce, auth, aes_key)
 
     split = result.split(str.encode("/!/"))
 
@@ -104,7 +128,9 @@ def decrypt_file(file_text, private_key):
         )
     )
     fernet = Fernet(symmetric_key)
-    return fernet.decrypt(split[1]).decode()
+    create_file(name, fernet.decrypt(split[1]).decode(), "dec")
+
+    return
 
 
 def read_private_key(filename):
@@ -126,14 +152,9 @@ def read_public_key(filename):
     return publicKey
 
 
-# private, public = generate_rsa_pair()
-#
-#
-# with open('public_key.pub', 'wb') as f:
-#     f.write(str.encode(public))
-# with open('private_key.pem', 'wb') as f:
-#     f.write(str.encode(private))
-#
-# encrypted1 = encrypt_file("bullshit dpc riadny", read_public_key("public_key.pub"))
-# original = decrypt_file(encrypted1, read_private_key("private_key.pem"))
-# print(original)
+if __name__ == '__main__':
+    fire.Fire({
+        'encrypt': encrypt,
+        'decrypt': decrypt,
+        'rsa': rsa
+    })

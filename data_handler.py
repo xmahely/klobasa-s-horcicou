@@ -2,13 +2,12 @@ import os
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 from werkzeug.utils import secure_filename
+import fldr
 
-UPLOAD_FOLDER = 'C:/Users/mmahe/OneDrive/Počítač/UPB/tmp'
 
-
-def read_private_key(file):
+def read_private_key(file, remove=False):
     filename = secure_filename(file.filename)
-    path = os.path.join(UPLOAD_FOLDER, filename)
+    path = os.path.join(fldr.UPLOAD_FOLDER, filename)
     file.save(path)
     if os.stat(path).st_size == 0:
         return False
@@ -22,12 +21,14 @@ def read_private_key(file):
                 )
         except Exception:
             return False
+        if remove:
+            os.remove(path)
         return privateKey
 
 
-def read_public_key(file):
+def read_public_key(file, remove=False):
     filename = secure_filename(file.filename)
-    path = os.path.join(UPLOAD_FOLDER, filename)
+    path = os.path.join(fldr.UPLOAD_FOLDER, filename)
     file.save(path)
     if os.stat(path).st_size == 0:
         return False
@@ -40,13 +41,15 @@ def read_public_key(file):
                 )
         except Exception:
             return False
+        if remove:
+            os.remove(path)
         return publicKey
 
 
 # ak je remove = True, tak file zmaže
 def read_file(file, remove=False):
     filename = secure_filename(file.filename)
-    path = os.path.join(UPLOAD_FOLDER, filename)
+    path = os.path.join(fldr.UPLOAD_FOLDER, filename)
     file.save(path)
     if os.stat(path).st_size == 0:
         return False

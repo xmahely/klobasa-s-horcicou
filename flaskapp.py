@@ -1,22 +1,44 @@
 import os
-from flask import Flask, redirect, url_for, render_template, request, flash, send_file
+from flask import Flask, redirect, url_for, render_template, request, flash, send_file, session
 from werkzeug.exceptions import RequestEntityTooLarge
-from werkzeug.utils import secure_filename
-
-import test
+import fldr
 import data_handler
 import encrypt_decrypt
-
-UPLOAD_FOLDER = 'C:/Users/mmahe/OneDrive/Počítač/UPB/tmp'
-app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 1024
-app.secret_key = 'super secret key'
+from app_config import app, db
 
 
 @app.route("/")
 def home():
     return render_template("index.html")
+
+
+@app.route("/login", methods=["POST", "GET"])
+def login():
+    if request.method == "POST":
+        session.permanent = True
+        user = request.form["username"]
+        session["user"] = user
+        return redirect(url_for("user"))
+    else:
+        if "user" in session:
+            return redirect(url_for("user"))
+        return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    session.pop("user", None)
+    return redirect(url_for("login"))
+
+
+@app.route("/user")
+def user():
+    if "user" in session:
+        user = session["user"]
+
+        return render_template("user_page.html", username=user)
+    else:
+        return redirect(url_for("login"))
 
 
 def allowed_file(file, extension):
@@ -25,9 +47,19 @@ def allowed_file(file, extension):
     return '.' in file and file.rsplit('.', 1)[1].lower() == extension
 
 
-@app.route("/download/<path>")
+@app.route("/download/<path:path>")
 def download_file(path):
+    # return send_file("/"+path, as_attachment=True)
     return send_file(path, as_attachment=True)
+
+@app.route("/download/documentation")
+def download_documentation():
+    return send_file("documentation.pdf", as_attachment=True)
+
+
+@app.route("/download/enc_tool")
+def download_enc_tool():
+    return send_file("enc_tool.py", as_attachment=True)
 
 
 @app.route("/encrypt", methods=["POST", "GET"])
@@ -54,21 +86,20 @@ def encrypt():
             return redirect(request.url)
 
         text_file_string = data_handler.read_file(text_file, True)
+
         if not text_file_string:
             flash('Text file must not be empty !')
             return redirect(request.url)
-        public_key_string = data_handler.read_public_key(public_key)
+        public_key_string = data_handler.read_public_key(public_key, True)
         if not public_key_string:
             flash('Key has to have correct format !')
             return redirect(request.url)
         else:
-            decrypted_text_string = encrypt_decrypt.encrypt_file(text_file_string, public_key_string)
-            f = open('encrypted.txt', "w+")
-            f.write(decrypted_text_string)
+            encrypted_text_string = encrypt_decrypt.encrypt_file(text_file_string, public_key_string)
+            path = os.path.join(fldr.UPLOAD_FOLDER, 'encrypted.txt')
+            f = open(path, "w+")
+            f.write(encrypted_text_string)
             f.close()
-            # path = os.path.join(UPLOAD_FOLDER, 'encrypted')
-            # skuste sa pohrat s tymito cestami, aby to napr. islo z priecinku tmp
-            path = "encrypted.txt"
             return render_template('download.html', header="Encrypted file", path_download=path)
     else:
         return render_template("encrypt.html")
@@ -101,18 +132,16 @@ def decrypt():
         if not text_file_string:
             flash('Text file must not be empty !')
             return redirect(request.url)
-        private_key_string = data_handler.read_private_key(private_key)
+        private_key_string = data_handler.read_private_key(private_key, True)
         if not private_key_string:
             flash('Key has to have correct format !')
             return redirect(request.url)
         else:
             decrypted_text_string = encrypt_decrypt.decrypt_file(text_file_string, private_key_string)
-            f = open('decrypted.txt', "w+")
+            path = os.path.join(fldr.UPLOAD_FOLDER, 'decrypted.txt')
+            f = open(path, "w+")
             f.write(decrypted_text_string)
             f.close()
-            # path = os.path.join(UPLOAD_FOLDER, 'encrypted')
-            # skuste sa pohrat s tymito cestami, aby to napr. islo z priecinku tmp
-            path = "decrypted.txt"
             return render_template('download.html', header="Decrypted file", path_download=path)
     else:
         return render_template("decrypt.html")
@@ -122,11 +151,8 @@ def decrypt():
 def generate_keys():
     if request.method == "POST":
         private_key, public_key = encrypt_decrypt.generate_rsa_pair()
-
-        # skuste sa pohrat s tymito cestami, aby to napr. islo z priecinku tmp
-        path_public_key = 'public_key.pub'
-        path_private_key = 'private_key.pem'
-
+        path_public_key = os.path.join(fldr.UPLOAD_FOLDER, 'public_key.pub')
+        path_private_key = os.path.join(fldr.UPLOAD_FOLDER, 'private_key.pem')
         f = open(path_private_key, "w+")
         f.write(private_key)
         f.close()
@@ -146,5 +172,7 @@ def nope():
 
 
 if __name__ == "__main__":
+    # with app.app_context():
+    #     db.create_all()
     app.debug = True
     app.run(host='0.0.0.0')
