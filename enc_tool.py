@@ -8,6 +8,7 @@ from cryptography.fernet import Fernet
 import base64
 import os
 import fire
+import bcrypt
 
 
 def base64Encoding(input):
@@ -150,6 +151,12 @@ def read_public_key(filename):
             backend=default_backend()
         )
     return publicKey
+
+
+def psswd_hash(input):
+    salt = bcrypt.gensalt()
+    hash = bcrypt.hashpw(input.encode(),salt)
+    return hash, salt
 
 
 if __name__ == '__main__':
