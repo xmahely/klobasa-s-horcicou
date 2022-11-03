@@ -1,4 +1,4 @@
-from Cryptodome.Cipher import AES
+from Crypto.Cipher import AES
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa as RSA
 from cryptography.hazmat.primitives import serialization
