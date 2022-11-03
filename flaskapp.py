@@ -1,10 +1,11 @@
 import os
 from flask import Flask, redirect, url_for, render_template, request, flash, send_file, session
 from werkzeug.exceptions import RequestEntityTooLarge
+from flask_login import current_user, login_user, logout_user, login_required
 import fldr
 import data_handler
-import encrypt_decrypt
-from app_config import app, db
+import encrypt_decrypt as ED
+from app_config import app, db, User
 
 
 @app.route("/")
@@ -15,10 +16,29 @@ def home():
 @app.route("/login", methods=["POST", "GET"])
 def login():
     if request.method == "POST":
+        if 'timeout' not in session:  # cas medzi prihlaseniami
+            session['timeout'] = 0
+        if 'counter' not in session:
+            session['counter'] = 0
         session.permanent = True
-        user = request.form["username"]
-        session["user"] = user
-        return redirect(url_for("user"))
+        user = request.form["username"].strip()
+        password = request.form["password"]
+        u = User.query.filter_by(name=user).first()
+        # TODO odpocitavanie kedy povoli dalsi pokus o prihlasenie
+        try:
+            if ED.authenticate(u.salt, password.strip(), u.psswd) == 0:
+                # session['user'] = user
+                login_user(u)
+                return redirect(url_for("user"))
+            else:
+                if 'counter' in session:
+                    session['counter'] = session.get('counter') + 1
+                if session.get('counter') > 3:
+                    session.pop('counter',None)
+                    session['timeout'] = session.get('timeout') + 10
+                return render_template("login.html")
+        except Exception:
+            return render_template("login.html")
     else:
         if "user" in session:
             return redirect(url_for("user"))
@@ -27,16 +47,14 @@ def login():
 
 @app.route("/logout")
 def logout():
-    session.pop("user", None)
+    logout_user()
     return redirect(url_for("login"))
 
 
 @app.route("/user")
 def user():
-    if "user" in session:
-        user = session["user"]
-
-        return render_template("user_page.html", username=user)
+    if current_user.is_authenticated:
+        return render_template("user_page.html", username=current_user)
     else:
         return redirect(url_for("login"))
 
@@ -52,6 +70,7 @@ def download_file(path):
     # return send_file("/"+path, as_attachment=True)
     return send_file(path, as_attachment=True)
 
+
 @app.route("/download/documentation")
 def download_documentation():
     return send_file("documentation.pdf", as_attachment=True)
@@ -61,8 +80,14 @@ def download_documentation():
 def download_enc_tool():
     return send_file("enc_tool.py", as_attachment=True)
 
+# TODO toto by malo fungovat ale nefunguje
+@app.errorhandler(401)
+def unauthorized(e):
+    return render_template("401.html")
+
 
 @app.route("/encrypt", methods=["POST", "GET"])
+@login_required
 def encrypt():
     if request.method == "POST":
         try:
@@ -95,7 +120,7 @@ def encrypt():
             flash('Key has to have correct format !')
             return redirect(request.url)
         else:
-            encrypted_text_string = encrypt_decrypt.encrypt_file(text_file_string, public_key_string)
+            encrypted_text_string = ED.encrypt_file(text_file_string, public_key_string)
             path = os.path.join(fldr.UPLOAD_FOLDER, 'encrypted.txt')
             f = open(path, "w+")
             f.write(encrypted_text_string)
@@ -106,6 +131,7 @@ def encrypt():
 
 
 @app.route("/decrypt", methods=["POST", "GET"])
+@login_required
 def decrypt():
     if request.method == "POST":
         try:
@@ -137,7 +163,7 @@ def decrypt():
             flash('Key has to have correct format !')
             return redirect(request.url)
         else:
-            decrypted_text_string = encrypt_decrypt.decrypt_file(text_file_string, private_key_string)
+            decrypted_text_string = ED.decrypt_file(text_file_string, private_key_string)
             path = os.path.join(fldr.UPLOAD_FOLDER, 'decrypted.txt')
             f = open(path, "w+")
             f.write(decrypted_text_string)
@@ -148,9 +174,10 @@ def decrypt():
 
 
 @app.route("/generate", methods=["POST", "GET"])
+@login_required
 def generate_keys():
     if request.method == "POST":
-        private_key, public_key = encrypt_decrypt.generate_rsa_pair()
+        private_key, public_key = ED.generate_rsa_pair()
         path_public_key = os.path.join(fldr.UPLOAD_FOLDER, 'public_key.pub')
         path_private_key = os.path.join(fldr.UPLOAD_FOLDER, 'private_key.pem')
         f = open(path_private_key, "w+")
@@ -172,7 +199,5 @@ def nope():
 
 
 if __name__ == "__main__":
-    # with app.app_context():
-    #     db.create_all()
     app.debug = True
     app.run(host='0.0.0.0')

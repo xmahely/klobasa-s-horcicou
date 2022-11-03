@@ -1,4 +1,4 @@
-from Crypto.Cipher import AES
+from Cryptodome.Cipher import AES
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa as RSA
 from cryptography.hazmat.primitives import serialization
@@ -7,6 +7,7 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.fernet import Fernet
 import base64
 import os
+import bcrypt
 
 
 def base64Encoding(input):
@@ -126,14 +127,14 @@ def read_public_key(filename):
     return publicKey
 
 
-# private, public = generate_rsa_pair()
-#
-#
-# with open('public_key.pub', 'wb') as f:
-#     f.write(str.encode(public))
-# with open('private_key.pem', 'wb') as f:
-#     f.write(str.encode(private))
-#
-# encrypted1 = encrypt_file("bullshit dpc riadny", read_public_key("public_key.pub"))
-# original = decrypt_file(encrypted1, read_private_key("private_key.pem"))
-# print(original)
+def psswd_hash(input):
+    salt = bcrypt.gensalt()
+    hash = bcrypt.hashpw(input.encode(),salt)
+    return hash, salt
+
+
+def authenticate(salt,psswd, db_psswd):
+    auth = bcrypt.hashpw(str.encode(psswd),str.encode(salt))
+    if auth.decode() != db_psswd:
+        return -1
+    return 0
