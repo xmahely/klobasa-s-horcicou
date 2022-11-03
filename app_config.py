@@ -25,7 +25,7 @@ class User(db.Model):
     email = db.Column(db.String(255))
     psswd = db.Column(db.String(255))
     salt = db.Column(db.String(255))
-    is_active = db.Column(db.Boolean, default=False)
+    is_active = db.Column(db.Boolean, default=True)
 
     @staticmethod
     def create(name, email, psswd):  # create new user

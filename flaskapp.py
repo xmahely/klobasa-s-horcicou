@@ -27,22 +27,19 @@ def login():
         # TODO odpocitavanie kedy povoli dalsi pokus o prihlasenie
         try:
             if ED.authenticate(u.salt, password.strip(), u.psswd) == 0:
-                # session['user'] = user
                 login_user(u)
                 return redirect(url_for("user"))
             else:
                 if 'counter' in session:
                     session['counter'] = session.get('counter') + 1
                 if session.get('counter') > 3:
-                    session.pop('counter',None)
+                    session.pop('counter', None)
                     session['timeout'] = session.get('timeout') + 10
                 return render_template("login.html")
         except Exception:
             return render_template("login.html")
     else:
-        if "user" in session:
-            return redirect(url_for("user"))
-        return render_template("login.html")
+        return redirect(url_for("user"))
 
 
 @app.route("/logout")
@@ -80,7 +77,6 @@ def download_documentation():
 def download_enc_tool():
     return send_file("enc_tool.py", as_attachment=True)
 
-# TODO toto by malo fungovat ale nefunguje
 @app.errorhandler(401)
 def unauthorized(e):
     return render_template("401.html")
