@@ -5,7 +5,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 import fldr
 import data_handler
 import encrypt_decrypt as ED
-from app_config import app, db, User
+from app_config import app, db, User, Message
 
 
 @app.route("/")
@@ -39,6 +39,7 @@ def login():
         except Exception:
             return render_template("login.html")
     else:
+        return render_template("login.html")
         return redirect(url_for("user"))
 
 
@@ -170,7 +171,7 @@ def decrypt():
 
 
 @app.route("/generate", methods=["POST", "GET"])
-@login_required
+#@login_required
 def generate_keys():
     if request.method == "POST":
         private_key, public_key = ED.generate_rsa_pair()
@@ -192,6 +193,48 @@ def generate_keys():
 @app.route("/nope")
 def nope():
     return "I give up :("
+
+
+#<input class="textarea form-control" type="textarea" id="text" name="text" rows="4">
+@app.route("/chat", methods=["POST", "GET"])
+#@login_required
+def chat():
+    if request.method == "POST":
+        
+        message = request.form.get('message', "error")
+        #Moving forward code
+
+
+        public_key_path = ("tmp/public_key.pub")
+
+            
+
+        text_file_string = message
+
+        
+        public_key_string = data_handler.read_public_key2(public_key_path)
+        if not public_key_string:
+            flash('Key has to have correct format !')
+            return redirect(request.url)
+        else:
+            encrypted_text_string = ED.encrypt_file(text_file_string, public_key_string)
+            path = os.path.join(fldr.UPLOAD_FOLDER, 'encrypted.txt')
+            f = open(path, "w+")
+            f.write(encrypted_text_string)
+            f.close()
+            
+
+
+        
+        Message.create(1, 2, path)
+        return render_template("chat.html")
+    else:
+
+
+        
+        return render_template("chat.html")
+
+
 
 
 if __name__ == "__main__":
