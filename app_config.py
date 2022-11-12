@@ -1,6 +1,6 @@
 from datetime import timedelta
 from flask import Flask
-from flask_login import LoginManager
+from flask_login import LoginManager, UserMixin
 import fldr
 from flask_sqlalchemy import SQLAlchemy
 import encrypt_decrypt as ED
@@ -19,18 +19,27 @@ login.init_app(app)
 db = SQLAlchemy(app)
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
+    __tablename__ = 'user'
     user_id = db.Column('user_id', db.Integer, primary_key=True)
     name = db.Column(db.String(100))
     email = db.Column(db.String(255))
     psswd = db.Column(db.String(255))
     salt = db.Column(db.String(255))
+    pub = db.Column(db.String(255))
+    priv = db.Column(db.String(255))
     is_active = db.Column(db.Boolean, default=True)
+
+    @staticmethod
+    def change_keys(self, private, public):
+        self.priv = private.encode()
+        self.pub = public
 
     @staticmethod
     def create(name, email, psswd):  # create new user
         psswd, salt = ED.psswd_hash(psswd)
-        new_user = User(name, email,psswd, salt)
+        private, public = ED.generate_rsa_pair()
+        new_user = User(name=name, email=email, psswd=psswd, salt=salt, priv=private.encode(), pub=public)
         db.session.add(new_user)
         db.session.commit()
 
@@ -44,13 +53,11 @@ class User(db.Model):
     def load_user(id):
         return User.query.get(int(id))
 
+    def __init__(self, name, email, psswd, salt, priv, pub):
+        self.name = name
+        self.email = email
+        self.psswd = psswd
+        self.salt = salt
+        self.priv = priv
+        self.pub = pub
 
-def __init__(self, name, email, psswd, salt):
-    self.name = name
-    self.email = email
-    self.psswd = psswd
-    self.salt = salt
-
-
-with app.app_context():
-    db.create_all()

@@ -1,4 +1,6 @@
 import os
+from pathlib import Path
+
 from flask import Flask, redirect, url_for, render_template, request, flash, send_file, session
 from werkzeug.exceptions import RequestEntityTooLarge
 from flask_login import current_user, login_user, logout_user, login_required
@@ -11,6 +13,30 @@ from app_config import app, db, User
 @app.route("/")
 def home():
     return render_template("index.html")
+
+
+@app.route("/register", methods=["POST", "GET"])
+def register():
+    if request.method == "POST":
+        username = request.form["username"].strip()
+        email = request.form["email"]
+        password = request.form["password"]
+        confirm = request.form["password2"]
+        existing_user_username = User.query.filter_by(name=username).first()  # najde prvu zhodu v DB
+        existing_email = User.query.filter_by(email=email).first()
+        check = ED.psswd_check(password,confirm)
+        if existing_user_username:
+            flash('This username already exists, try a new one!')
+        elif existing_email:
+            flash('This email address is already in use!')
+        elif check == 1:
+            flash('Password too weak')
+        elif check == -1:
+            flash('Passwords do not match')
+        else:
+            User.create(username, email, password)
+            return redirect(url_for("login"))
+    return render_template("register.html")
 
 
 @app.route("/login", methods=["POST", "GET"])
@@ -28,7 +54,7 @@ def login():
         try:
             if ED.authenticate(u.salt, password.strip(), u.psswd) == 0:
                 login_user(u)
-                return redirect(url_for("user"))
+                return render_template("index.html")
             else:
                 if 'counter' in session:
                     session['counter'] = session.get('counter') + 1
@@ -36,10 +62,12 @@ def login():
                     session.pop('counter', None)
                     session['timeout'] = session.get('timeout') + 10
                 return render_template("login.html")
-        except Exception:
+        except Exception:  # neexistuje uzivatel
             return render_template("login.html")
     else:
-        return redirect(url_for("user"))
+        if current_user.is_authenticated:
+            return redirect(url_for("user"))
+        return render_template("login.html")
 
 
 @app.route("/logout")
@@ -51,7 +79,8 @@ def logout():
 @app.route("/user")
 def user():
     if current_user.is_authenticated:
-        return render_template("user_page.html", username=current_user)
+        return render_template("user_page.html", username=current_user.name, email=current_user.email,
+                               p_key=current_user.pub)
     else:
         return redirect(url_for("login"))
 
@@ -182,6 +211,11 @@ def generate_keys():
         f = open(path_public_key, "w+")
         f.write(public_key)
         f.close()
+
+        u = User.query.filter_by(name=current_user.name).first()
+        u.pub = public_key
+        u.priv = private_key.encode()
+        db.session.commit()
 
         return render_template('download2.html', header="Generated keys", path_public_key=path_public_key,
                                path_private_key=path_private_key)

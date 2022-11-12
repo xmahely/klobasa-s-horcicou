@@ -5,9 +5,16 @@
         <div class="row d-flex justify-content-center">
             <div class="col-xl-7 col-lg-8 col-md-9 col-11 text-center">
                 <div class="p-5">
-                     <h1>User homapage</h1>
+                     <h1>Hello {{ username }} </h1>
                 </div>
-                <p> Hello user : {{ username }}</p>
+                <p> Email: {{ email }}</p>
+                <p> Public key: <br>{{ p_key }} <br> </p>
+                 <div class = "p-5">
+                    <a href="{{url_for('download_file', path=path_public_key)}}">Download public key</a>
+                </div>
+                <div class = "p-5">
+                     <a href="{{url_for('download_file', path=path_private_key)}}">Download private key</a>
+                </div>
             </div>
         </div>
     </div>

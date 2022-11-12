@@ -8,6 +8,7 @@ from cryptography.fernet import Fernet
 import base64
 import os
 import bcrypt
+import re
 
 
 def base64Encoding(input):
@@ -138,3 +139,18 @@ def authenticate(salt,psswd, db_psswd):
     if auth.decode() != db_psswd:
         return -1
     return 0
+
+
+def psswd_check(input,conf):
+
+    if conf != input:
+        return -1
+    if len(input) < 6:
+        return 1
+
+    reg = "^[A-Za-z0-9_-]*$"
+    path = re.compile(reg)
+    match = re.search(path, input)
+    if match:
+        return 0
+    return 1
