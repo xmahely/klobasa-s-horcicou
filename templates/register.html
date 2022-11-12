@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block content %}
+    {% for message in get_flashed_messages() %}
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+          </button>
+          <strong>Warning!  </strong>{{message}}
+        </div>
+    {% endfor %}
+      <div class="container-fluid mx-auto">
+        <div class="row d-flex justify-content-center">
+            <div class="col-xl-7 col-lg-8 col-md-9 col-11 text-center">
+                <div class="p-5">
+                     <h1>Register</h1>
+                </div>
+                <!--   email  -->
+
+                 <form action="#" method="post" class="was-validated" enctype="multipart/form-data">
+                     <div class="mt-3">
+                        <div class="row justify-content-center">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email :</label>
+                                <input class="form-control" type="email" id="email" name ="email" required>
+                                <div class="valid-feedback">
+                                  Looks good!
+                                </div>
+                                 <div class="invalid-feedback">
+                                    Please fill in your email.
+                                 </div>
+
+                            </div>
+                        </div>
+                      </div >
+                     <!--  username  -->
+                      <div class="mt-3">
+                        <div class="row justify-content-center">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username :</label>
+                                <input class="form-control" type="text" id="username" name ="username" required>
+                                <div class="valid-feedback">
+                                  Looks good!
+                                </div>
+                                 <div class="invalid-feedback">
+                                    Please fill in your username.
+                                 </div>
+                            </div>
+                        </div>
+                      </div >
+                     <!--   psswd  -->
+
+                     <div class="mt-3">
+                        <div class="row justify-content-center">
+                            <div class="mb-3">
+                               <label for="password" class="form-label">Password :</label>
+                                <input class="form-control" type="password"  id="password" name ="password" required onfocus="check()">
+                                <div class="text-primary">
+                                    <input type="checkbox" onclick="myFunction('password')"> Show Password
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label>Confirm password: </label>
+                                <input class="form-control" type="password"  id="password2" name ="password2" required onfocus="check()">
+                                <span id='message'></span>
+                                <div class="text-primary">
+                                    <input type="checkbox" onclick="myFunction('password2')"> Show Password
+                                </div>
+                            </div>
+
+                            <ul class="list-unstyled">
+                                                    <li class="">
+                                                        <span class="low-upper-case">
+                                                            <i class="fas fa-circle" aria-hidden="true"></i>
+                                                            &nbsp;Lowercase &amp; Uppercase
+                                                        </span>
+                                                    </li>
+                                                    <li class="">
+                                                        <span class="one-number">
+                                                            <i class="fas fa-circle" aria-hidden="true"></i>
+                                                            &nbsp;Number (0-9)
+                                                        </span>
+                                                    </li>
+
+                                                    <li class="">
+                                                        <span class="six-character">
+                                                            <i class="fas fa-circle" aria-hidden="true"></i>
+                                                            &nbsp;Atleast 6 Character
+                                                        </span>
+                                                    </li>
+                                                </ul>
+
+                             <div class="mt-3" style="padding-bottom: 50px;">
+                                <div class="row justify-content-center">
+                                    <div class="form-group col-sm-6">
+                                        <button type="submit" class="btn btn-outline-secondary" onclick="check()">Submit </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                  </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
