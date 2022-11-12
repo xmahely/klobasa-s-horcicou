@@ -1,2 +1,3 @@
 UPLOAD_FOLDER = 'C:\\Users\\mmahe\\OneDrive\\Počítač\\UPB\\tmp'
-#UPLOAD_FOLDER = 'home/dbadmin/project/tmp/'
+# todo: pri pridávani na server odkomentovať
+#UPLOAD_FOLDER = '/home/Users/'

@@ -1,13 +1,19 @@
 import os
-from pathlib import Path
-
 from flask import Flask, redirect, url_for, render_template, request, flash, send_file, session
 from werkzeug.exceptions import RequestEntityTooLarge
 from flask_login import current_user, login_user, logout_user, login_required
 import fldr
 import data_handler
 import encrypt_decrypt as ED
-from app_config import app, db, User
+from app_config import app, db, login, User
+
+with app.app_context():
+    db.create_all()
+
+
+@login.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 
 @app.route("/")
@@ -22,20 +28,31 @@ def register():
         email = request.form["email"]
         password = request.form["password"]
         confirm = request.form["password2"]
-        existing_user_username = User.query.filter_by(name=username).first()  # najde prvu zhodu v DB
-        existing_email = User.query.filter_by(email=email).first()
-        check = ED.psswd_check(password,confirm)
-        if existing_user_username:
-            flash('This username already exists, try a new one!')
-        elif existing_email:
-            flash('This email address is already in use!')
-        elif check == 1:
-            flash('Password too weak')
-        elif check == -1:
-            flash('Passwords do not match')
-        else:
-            User.create(username, email, password)
-            return redirect(url_for("login"))
+        # vytváranie nového užívateľa sa bude volať tu, nie vnútri classy User
+        psswd, salt = ED.psswd_hash(password)
+        new_user = User(username, email, psswd, salt)
+        db.session.add(new_user)
+        try:
+            db.session.commit()
+        except Exception as e:
+            return "error" + str(e)
+        return "ok"
+
+        # existing_user_username = User.query.filter_by
+        # (name=username).first()  # najde prvu zhodu v DB
+        # existing_email = User.query.filter_by(email=email).first()
+        # check = ED.psswd_check(password, confirm)
+        # if existing_user_username:
+        #     flash('This username already exists, try a new one!')
+        # elif existing_email:
+        #     flash('This email address is already in use!')
+        # elif check == 1:
+        #     flash('Password too weak')
+        # elif check == -1:
+        #     flash('Passwords do not match')
+        # else:
+        #     User.create(username, email, password)
+        #     return redirect(url_for("login"))
     return render_template("register.html")
 
 
@@ -93,7 +110,8 @@ def allowed_file(file, extension):
 
 @app.route("/download/<path:path>")
 def download_file(path):
-    # return send_file("/"+path, as_attachment=True)
+    # todo: pri pridávani na server odkomentovať, musí tam byť /
+    #return send_file("/"+path, as_attachment=True)
     return send_file(path, as_attachment=True)
 
 
@@ -105,6 +123,7 @@ def download_documentation():
 @app.route("/download/enc_tool")
 def download_enc_tool():
     return send_file("enc_tool.py", as_attachment=True)
+
 
 @app.errorhandler(401)
 def unauthorized(e):
@@ -229,5 +248,7 @@ def nope():
 
 
 if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
     app.debug = True
     app.run(host='0.0.0.0')
