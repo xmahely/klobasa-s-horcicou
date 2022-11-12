@@ -35,7 +35,6 @@ class User(db.Model, UserMixin):
         self.priv = private.encode()
         self.pub = public
 
-
     @staticmethod
     def create(name, email, psswd):  # create new user
         psswd, salt = ED.psswd_hash(psswd)

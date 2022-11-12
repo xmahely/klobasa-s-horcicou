@@ -106,7 +106,6 @@ def download_documentation():
 def download_enc_tool():
     return send_file("enc_tool.py", as_attachment=True)
 
-
 @app.errorhandler(401)
 def unauthorized(e):
     return render_template("401.html")
