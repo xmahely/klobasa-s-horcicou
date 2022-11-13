@@ -266,8 +266,8 @@ def chat(chatterID = 0):
             json =getJSON(current_user.user_id)
             return render_template("chat.html", messages=json, displayUser=chatterID)
         #Moving forward code
-        print(newUser)
-        print(current_user.user_id)
+        print("TO: ",newUser)
+        print("FROM: ",current_user.user_id)
 
         public_key_path = ("tmp/public_key.pub")
 
@@ -276,7 +276,8 @@ def chat(chatterID = 0):
         text_file_string = message
 
         
-        public_key_string = data_handler.read_public_key2(public_key_path)
+        public_key_string = data_handler.read_public_key3(User.getPublicKey(newUser))
+        print(public_key_string)
         if not public_key_string:
             flash('Key has to have correct format !')
             return redirect(request.url)
@@ -307,15 +308,19 @@ def getJSON(user_ID):
     struct = {}
     try:
         messages = selectMessages(user_ID)
-        print(messages)
+        print(user_ID)
         for message in messages:
             
-            private_key_path = ("tmp/private_key.pem")
-            private_key_string = data_handler.read_private_key2(private_key_path)
+            #private_key_path = ("tmp/private_key.pem")
+            #private_key_string = data_handler.read_private_key2(private_key_path)
+            private_key_string = data_handler.read_private_key3(User.getPrivateKey(message.recipient_ID))
+            
             fp = open(message.messageLocation, 'r')
             message_string = fp.read()
+            
             fp.close() 
             decrypted_text_string = ED.decrypt_file(message_string , private_key_string)
+            print(message.recipient_ID)
             if (message.sender_ID==user_ID):
                 #print(message.messageLocation)
                 struct.setdefault(message.recipient_ID,[]).append(tuple((User.getUserNameById(message.sender_ID), decrypted_text_string)))
@@ -327,6 +332,7 @@ def getJSON(user_ID):
         #print(jsonData)
         return struct
     except:
+        print("OH MY LAWRD")
         return struct
 
 def getUserName(id):

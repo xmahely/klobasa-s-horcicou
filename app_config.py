@@ -26,8 +26,8 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(255))
     psswd = db.Column(db.String(255))
     salt = db.Column(db.String(255))
-    pub = db.Column(db.String(255), default=None)
-    priv = db.Column(db.String(255), default=None)
+    pub = db.Column(db.String(511), default=None)
+    priv = db.Column(db.String(2047), default=None)
     is_active = db.Column(db.Boolean, default=True)
     authenticated = db.Column(db.Boolean, default=False)
 
@@ -63,23 +63,30 @@ class User(db.Model, UserMixin):
             return User.query.filter_by(name=name).first().user_id
         except:
             return None
+    
+    def getPublicKey(id):
+        return User.query.filter_by(user_id=id).first().pub
+
+    def getPrivateKey(id):
+        return User.query.filter_by(user_id=id).first().priv
     @login.user_loader
     def load_user(id):
         return User.query.get(int(id))
 
 
-    def __init__(self, name, email, psswd, salt):
+    def __init__(self, name, email, psswd, salt, private, public):
         self.name = name
         self.email = email
         self.psswd = psswd
         self.salt = salt
-
+        self.pub = public
+        self.priv = private
     
 class Message(db.Model):
     message_id = db.Column('message_id', db.Integer, primary_key=True)
     sender_ID = db.Column(db.Integer)
     recipient_ID = db.Column(db.Integer)
-    messageLocation = db.Column(db.String(256))
+    messageLocation = db.Column(db.String(255))
 
 
     @staticmethod
@@ -102,7 +109,7 @@ class Message(db.Model):
 
 def selectMessages(user_ID):
     #s = select(Message.recipient_ID).where(Message.sender_ID == user_ID)
-    s = Message.query.filter((Message.sender_ID==1) |(Message.recipient_ID==1)).all()
+    s = Message.query.filter((Message.sender_ID==user_ID) |(Message.recipient_ID==user_ID)).all()
     #s += Message.query.filter_by(recipient_ID=1).all()
     
     if(len(s)>4 ):

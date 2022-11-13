@@ -79,6 +79,30 @@ def read_private_key2(path):
             return False
         return privateKey
 
+def read_public_key3(str):
+    try:
+        
+        publicKey = serialization.load_pem_public_key(
+            str.encode(),
+            backend=default_backend()
+        )
+        
+    except Exception:
+        return False
+
+    return publicKey
+
+def read_private_key3(str):
+    try:
+        privateKey = serialization.load_pem_private_key(
+            str.encode(),
+            password=None,
+            backend=default_backend()
+        )
+    except Exception:
+        return False
+    return privateKey
+
 
 # ak je remove = True, tak file zmaže
 def read_file(file, remove=False):
