@@ -5,7 +5,9 @@ from flask_login import current_user, login_user, logout_user, login_required
 import fldr
 import data_handler
 import encrypt_decrypt as ED
-from app_config import app, db, login, User
+from app_config import app, db, login, User, Message, selectMessages
+import uuid
+import json
 
 with app.app_context():
     db.create_all()
@@ -82,9 +84,8 @@ def login():
         except Exception:  # neexistuje uzivatel
             return render_template("login.html")
     else:
-        if current_user.is_authenticated:
-            return redirect(url_for("user"))
         return render_template("login.html")
+        return redirect(url_for("user"))
 
 
 @app.route("/logout")
@@ -218,7 +219,7 @@ def decrypt():
 
 
 @app.route("/generate", methods=["POST", "GET"])
-@login_required
+#@login_required
 def generate_keys():
     if request.method == "POST":
         private_key, public_key = ED.generate_rsa_pair()
@@ -247,8 +248,92 @@ def nope():
     return "I give up :("
 
 
+#<input class="textarea form-control" type="textarea" id="text" name="text" rows="4">
+@app.route("/chat/", methods=["POST", "GET"],defaults={'chatterID': 0})
+@app.route("/chat/<int:chatterID>", methods=["POST", "GET"])
+#@login_required
+def chat(chatterID = 0):
+    #print(chatterID)
+    if request.method == "POST":
+        
+        message = request.form.get('message', "error")
+        newUser = request.form.get('newUser', chatterID)
+        if(message == "error" and newUser != chatterID):
+            message = "Hello"
+            newUser = User.getIdByUserName(newUser)
+        #Moving forward code
+        print(newUser)
+
+        public_key_path = ("tmp/public_key.pub")
+
+            
+
+        text_file_string = message
+
+        
+        public_key_string = data_handler.read_public_key2(public_key_path)
+        if not public_key_string:
+            flash('Key has to have correct format !')
+            return redirect(request.url)
+        else:
+            encrypted_text_string = ED.encrypt_file(text_file_string, public_key_string)
+            unique_filename = str(uuid.uuid4())
+            path = os.path.join(fldr.UPLOAD_FOLDER, unique_filename)
+            f = open(path, "w+")
+            f.write(encrypted_text_string)
+            f.close()
+            
+
+
+        
+        Message.create(1, newUser, path)
+        json =getJSON(1)
+        #print(selectMessages(1))
+        return render_template("chat.html", messages=json, displayUser=chatterID)
+    else:
+
+
+        
+        json =getJSON(1)
+        #print(selectMessages(1))
+        return render_template("chat.html", messages=json, displayUser=chatterID)
+
+def getJSON(user_ID):
+    struct = {}
+    try:
+        messages = selectMessages(user_ID)
+        
+        for message in messages:
+            
+            private_key_path = ("tmp/private_key.pem")
+            private_key_string = data_handler.read_private_key2(private_key_path)
+            fp = open(message.messageLocation, 'r')
+            message_string = fp.read()
+            fp.close() 
+            decrypted_text_string = ED.decrypt_file(message_string , private_key_string)
+            if (message.sender_ID==user_ID):
+                #print(message.messageLocation)
+                struct.setdefault(message.recipient_ID,[]).append(tuple((User.getUserNameById(message.sender_ID), decrypted_text_string)))
+            if (message.recipient_ID==user_ID):
+                #print(message.messageLocation)
+                struct.setdefault(message.sender_ID,[]).append(tuple((User.getUserNameById(message.sender_ID), decrypted_text_string)))
+            
+        jsonData= json.dumps(struct)
+        #print(jsonData)
+        return struct
+    except:
+        return struct
+
+def getUserName(id):
+    return User.getUserNameById(id)
+
+
+
 if __name__ == "__main__":
+    app.jinja_env.globals.update(getUserName=getUserName)
     with app.app_context():
         db.create_all()
+    
     app.debug = True
     app.run(host='0.0.0.0')
+    

@@ -45,6 +45,40 @@ def read_public_key(file, remove=False):
             os.remove(path)
         return publicKey
 
+def read_public_key2(path):
+
+
+    if os.stat(path).st_size == 0:
+        return False
+    else:
+        try:
+            with open(path, "rb") as key_file:
+                publicKey = serialization.load_pem_public_key(
+                    key_file.read(),
+                    backend=default_backend()
+                )
+        except Exception:
+            return False
+
+        return publicKey
+
+def read_private_key2(path):
+
+
+    if os.stat(path).st_size == 0:
+        return False
+    else:
+        try:
+            with open(path, "rb") as key_file:
+                privateKey = serialization.load_pem_private_key(
+                    key_file.read(),
+                    password=None,
+                    backend=default_backend()
+                )
+        except Exception:
+            return False
+        return privateKey
+
 
 # ak je remove = True, tak file zmaže
 def read_file(file, remove=False):
