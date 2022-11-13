@@ -33,7 +33,7 @@ def register():
         # vytváranie nového užívateľa sa bude volať tu, nie vnútri classy User
         psswd, salt = ED.psswd_hash(password)
         private, public = ED.generate_rsa_pair()
-        new_user = User(username, email, psswd, salt)
+        new_user = User(username, email, psswd, salt, private.encode(), public)
         db.session.add(new_user)
         try:
             db.session.commit()
