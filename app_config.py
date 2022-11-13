@@ -45,11 +45,37 @@ class User(db.Model):
         return User.query.get(int(id))
 
 
-def __init__(self, name, email, psswd, salt):
-    self.name = name
-    self.email = email
-    self.psswd = psswd
-    self.salt = salt
+    def __init__(self, name, email, psswd, salt):
+        self.name = name
+        self.email = email
+        self.psswd = psswd
+        self.salt = salt
+
+
+class Message(db.Model):
+    message_id = db.Column('message_id', db.Integer, primary_key=True)
+    sender_ID = db.Column(db.Integer)
+    recipient_ID = db.Column(db.Integer)
+    messageLocation = db.Column(db.String(100))
+
+
+    @staticmethod
+    def create(sender_ID, recipient_ID, messageLocation):  # create new user
+        new_message = Message(sender_ID, recipient_ID, messageLocation)
+        db.session.add(new_message)
+        db.session.commit()
+
+
+    def get_id(self):
+        return self.user_id
+
+
+
+    def __init__(self, sender_ID, recipient_ID, messageLocation):
+        self.sender_ID = sender_ID
+        self.recipient_ID = recipient_ID
+        self.messageLocation = messageLocation
+
 
 
 with app.app_context():
