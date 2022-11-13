@@ -31,13 +31,13 @@ class User(db.Model, UserMixin):
     is_active = db.Column(db.Boolean, default=True)
     authenticated = db.Column(db.Boolean, default=False)
 
-    def __init__(self, name, email, psswd, salt):
+    def __init__(self, name, email, psswd, salt, private, public):
         self.name = name
         self.email = email
         self.psswd = psswd
         self.salt = salt
-        self.pub = None
-        self.priv = None
+        self.pub = public
+        self.priv = private
 
     def change_keys(self, private, public):
         self.priv = private.encode()
@@ -59,8 +59,10 @@ class User(db.Model, UserMixin):
         return User.query.get(id).name
 
     def getIdByUserName(name):
-        return User.query.filter_by(name=name).first().user_id
-
+        try:
+            return User.query.filter_by(name=name).first().user_id
+        except:
+            return None
     @login.user_loader
     def load_user(id):
         return User.query.get(int(id))

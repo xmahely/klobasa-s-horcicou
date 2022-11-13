@@ -32,6 +32,7 @@ def register():
         confirm = request.form["password2"]
         # vytváranie nového užívateľa sa bude volať tu, nie vnútri classy User
         psswd, salt = ED.psswd_hash(password)
+        private, public = ED.generate_rsa_pair()
         new_user = User(username, email, psswd, salt)
         db.session.add(new_user)
         try:
@@ -261,8 +262,12 @@ def chat(chatterID = 0):
         if(message == "error" and newUser != chatterID):
             message = "Hello"
             newUser = User.getIdByUserName(newUser)
+        if newUser == None:
+            json =getJSON(current_user.user_id)
+            return render_template("chat.html", messages=json, displayUser=chatterID)
         #Moving forward code
         print(newUser)
+        print(current_user.user_id)
 
         public_key_path = ("tmp/public_key.pub")
 
@@ -278,7 +283,7 @@ def chat(chatterID = 0):
         else:
             encrypted_text_string = ED.encrypt_file(text_file_string, public_key_string)
             unique_filename = str(uuid.uuid4())
-            path = os.path.join(fldr.UPLOAD_FOLDER, unique_filename)
+            path = os.path.join(fldr.UPLOAD_FOLDER,'messages', unique_filename)
             f = open(path, "w+")
             f.write(encrypted_text_string)
             f.close()
@@ -286,15 +291,15 @@ def chat(chatterID = 0):
 
 
         
-        Message.create(1, newUser, path)
-        json =getJSON(1)
+        Message.create(current_user.user_id, newUser, path)
+        json =getJSON(current_user.user_id)
         #print(selectMessages(1))
         return render_template("chat.html", messages=json, displayUser=chatterID)
     else:
 
 
         
-        json =getJSON(1)
+        json =getJSON(current_user.user_id)
         #print(selectMessages(1))
         return render_template("chat.html", messages=json, displayUser=chatterID)
 
@@ -302,7 +307,7 @@ def getJSON(user_ID):
     struct = {}
     try:
         messages = selectMessages(user_ID)
-        
+        print(messages)
         for message in messages:
             
             private_key_path = ("tmp/private_key.pem")
@@ -318,7 +323,7 @@ def getJSON(user_ID):
                 #print(message.messageLocation)
                 struct.setdefault(message.sender_ID,[]).append(tuple((User.getUserNameById(message.sender_ID), decrypted_text_string)))
             
-        jsonData= json.dumps(struct)
+        print(struct)
         #print(jsonData)
         return struct
     except:
