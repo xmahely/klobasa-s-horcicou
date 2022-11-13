@@ -40,6 +40,12 @@ class User(db.Model):
     def get_id(self):
         return self.user_id
 
+    def getUserNameById(id):
+        return User.query.get(id).name
+
+    def getIdByUserName(name):
+        return User.query.filter_by(name=name).first().user_id
+
     @login.user_loader
     def load_user(id):
         return User.query.get(int(id))
@@ -51,12 +57,12 @@ class User(db.Model):
         self.psswd = psswd
         self.salt = salt
 
-
+    
 class Message(db.Model):
     message_id = db.Column('message_id', db.Integer, primary_key=True)
     sender_ID = db.Column(db.Integer)
     recipient_ID = db.Column(db.Integer)
-    messageLocation = db.Column(db.String(100))
+    messageLocation = db.Column(db.String(256))
 
 
     @staticmethod
@@ -75,6 +81,16 @@ class Message(db.Model):
         self.sender_ID = sender_ID
         self.recipient_ID = recipient_ID
         self.messageLocation = messageLocation
+
+
+def selectMessages(user_ID):
+    #s = select(Message.recipient_ID).where(Message.sender_ID == user_ID)
+    s = Message.query.filter((Message.sender_ID==1) |(Message.recipient_ID==1)).all()
+    #s += Message.query.filter_by(recipient_ID=1).all()
+    
+    if(len(s)>4 ):
+        s = s[-4:]
+    return s
 
 
 
