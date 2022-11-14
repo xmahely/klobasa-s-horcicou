@@ -6,6 +6,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.fernet import Fernet
 import base64
+import data_handler
 import os
 import bcrypt
 import re
@@ -141,16 +142,18 @@ def authenticate(salt,psswd, db_psswd):
     return 0
 
 
-def psswd_check(input,conf):
+def psswd_check(input, conf):
 
+    dict = data_handler.read_rockyou()
     if conf != input:
         return -1
     if len(input) < 6:
         return 1
-
     reg = "^[A-Za-z0-9_-]*$"
     path = re.compile(reg)
     match = re.search(path, input)
+    if input in dict:
+        return 1;
     if match:
         return 0
     return 1

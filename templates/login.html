@@ -1,41 +1,48 @@
 {% extends "base.html" %}
 {% block title %}Login{% endblock %}
 {% block content %}
-      <div class="container-fluid mx-auto">
+    {% for message in get_flashed_messages() %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+            </button>
+            <strong>Warning!  </strong>{{message}}
+        </div>
+    {% endfor %}
+    <div class="container-fluid mx-auto">
         <div class="row d-flex justify-content-center">
             <div class="col-xl-7 col-lg-8 col-md-9 col-11 text-center">
                 <div class="p-5">
-                     <h1>Login</h1>
+                    <h1>Login</h1>
                 </div>
-                 <form action="#" method="post" class="was-validated" enctype="multipart/form-data">
-                      <div class="mt-3">
+                <form action="#" method="post" class="was-validated" enctype="multipart/form-data">
+                    <div class="mt-3">
                         <div class="row justify-content-center">
                             <div class="mb-3">
-                               <label for="username" class="form-label">Username :</label>
+                                <label for="username" class="form-label">Username :</label>
                                 <input class="form-control" type="text" id="username" name ="username" required>
                                 <div class="valid-feedback">
-                                  Looks good!
+                                    Looks good!
                                 </div>
-                                 <div class="invalid-feedback">
+                                <div class="invalid-feedback">
                                     Please fill in your username.
-                                 </div>
+                                </div>
                             </div>
                         </div>
-                      </div >
+                    </div >
 
-                     <div class="mt-3">
+                    <div class="mt-3">
                         <div class="row justify-content-center">
                             <div class="mb-3">
-                               <label for="password" class="form-label">Password :</label>
+                                <label for="password" class="form-label">Password :</label>
                                 <input class="form-control" type="password"  id="password" name ="password" required>
                                 <div class="valid-feedback">
-                                  Looks good!
-                                 </div>
-                                 <div class="invalid-feedback">
+                                    Looks good!
+                                </div>
+                                <div class="invalid-feedback">
                                     Please fill in your password.
-                                 </div>
+                                </div>
                             </div>
-                             <div class="mt-3">
+                            <div class="mt-3">
                                 <div class="row justify-content-center">
                                     <div class="form-group col-sm-6">
                                         <button class="btn btn-outline-secondary" type="submit">Submit</button>
@@ -44,7 +51,7 @@
                             </div>
                         </div>
                     </div>
-                  </form>
+                </form>
             </div>
         </div>
     </div>
