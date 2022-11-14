@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Chat{% endblock %}
+{% block content %}
+{% for message in get_flashed_messages() %}
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+  </button>
+  <strong>Warning! </strong>{{message}}
+</div>
+{% endfor %}
+
+<head>
+  <style>
+    .gradient-custom {
+      /* fallback for old browsers */
+      background: #EEEEEE;
+
+      /* Chrome 10-25, Safari 5.1-6 */
+      background: -webkit-linear-gradient(to bottom right, rgba(252, 252, 252, 1), rgba(100, 100, 100, 1));
+
+      /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+      background: linear-gradient(to bottom right, rgba(252, 252, 252, 1), rgba(100, 100, 100, 1))
+    }
+
+    .mask-custom {
+      background: rgba(24, 24, 16, .2);
+      border-radius: 2em;
+      backdrop-filter: blur(15px);
+      border: 2px solid rgba(255, 255, 255, 0.05);
+      background-clip: padding-box;
+      box-shadow: 10px 10px 10px rgba(46, 54, 68, 0.03);
+    }
+  </style>
+</head>
+<section class="gradient-custom">
+  <div class="container py-5">
+
+    <div class="row">
+
+      <div class="col-md-6 col-lg-5 col-xl-5 mb-4 mb-md-0">
+
+        <h5 class="font-weight-bold mb-3 text-center text-white">Member</h5>
+
+        <div class="card mask-custom">
+          <div class="card-body">
+
+            <ul class="list-unstyled mb-0">
+
+              {% for user in messages %}
+
+              <li class="p-2 border-bottom" style="border-bottom: 1px solid rgba(255,255,255,.3) !important;">
+                <a href="#!" class="d-flex justify-content-between link-light">
+                  <div class="d-flex flex-row">
+                    <img src="https://cdn-icons-png.flaticon.com/512/21/21104.png" alt="avatar"
+                      class="rounded-circle d-flex align-self-center me-3 shadow-1-strong" width="60">
+                    <div class="pt-1">
+                      <p class="fw-bold mb-0"><a href="{{ url_for('chat',chatterID=user) }}">{{ getUserName(user)}}</a></p>
+                      <p class="small text-white"></p>
+                    </div>
+                  </div>
+                  
+                </a>
+              </li>
+
+              {% endfor %}
+              <form action="#" method="post" class="was-validated" enctype="multipart/form-data">
+                <li class="mb-3">
+                  <div class="form-outline form-white">
+                    
+                      
+                        <input class="textarea form-control" type="textarea" id="newUser" name="newUser">
+
+                  </div>
+                </li>
+                
+                <input type="submit" class="btn btn-light btn-lg btn-rounded float-end" value="Submit">
+                
+              </form>
+            </ul>
+
+          </div>
+        </div>
+
+      </div>
+
+      <div class="col-md-6 col-lg-7 col-xl-7">
+
+        <ul class="list-unstyled text-white">
+          {% for message in messages[displayUser] %}
+          <li class="d-flex justify-content-between mb-4">
+            <img src="https://cdn-icons-png.flaticon.com/512/21/21104.png" alt="avatar"
+              class="rounded-circle d-flex align-self-start me-3 shadow-1-strong" width="60">
+            <div class="card mask-custom">
+              <div class="card-header d-flex justify-content-between p-3"
+                style="border-bottom: 1px solid rgba(255,255,255,.3);">
+                <p class="fw-bold mb-0">{{ message[0]}}</p>
+                
+              </div>
+              <div class="card-body">
+                <p class="mb-0">
+                  {{ message[1]}}
+                </p>
+              </div>
+            </div>
+          </li>
+          {% endfor %}
+          <form action="#" method="post" class="was-validated" enctype="multipart/form-data">
+            <li class="mb-3">
+              <div class="form-outline form-white">
+                
+                  {% if displayUser!=0 %}
+                    <input class="textarea form-control" type="textarea" id="message" name="message" rows="4">
+                  {% else %}
+                    {{ super() }}
+                  {% endif %}
+                
+                <!--<textarea class="form-control" id="message2" rows="4"></textarea>--->
+              </div>
+            </li>
+            {% if displayUser!=0 %}
+            <input type="submit" class="btn btn-light btn-lg btn-rounded float-end" value="Submit">
+            {% else %}
+            {{ super() }}
+          {% endif %}
+          </form>
+        </ul>
+
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}
