@@ -33,8 +33,7 @@ def register():
         email = request.form["email"]
         password = request.form["password"]
         confirm = request.form["password2"]
-        # vytváranie nového užívateľa sa bude volať tu, nie vnútri classy User
-        existing_user_username = User.getIdByUserName(username)  # najde prvu zhodu v DB
+        existing_user_username = User.getIdByUserName(username)
         existing_email = User.getIdByEmail(email)
         check = ED.psswd_check(password, confirm)
         if existing_user_username:
@@ -54,7 +53,7 @@ def register():
                 db.session.commit()
                 path = "/home/Users/" + username
                 os.mkdir(path)
-                make_key_files(username,private,public)
+                make_key_files(username, private, public)
                 # TODO toto nech neni warning
                 # namalo by sa stat ze existuje uz folder kedze username je unique
                 flash('Registration successful','')
@@ -62,6 +61,7 @@ def register():
             except Exception as e:
                 return render_template("register.html")
     return render_template("register.html")
+
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
@@ -248,6 +248,9 @@ def decrypt():
 
 
 def make_key_files(username, private_key, public_key):
+
+    if not os.path.isdir(os.path.join(fldr.UPLOAD_FOLDER, username)):
+        os.mkdir(os.path.join(fldr.UPLOAD_FOLDER, username))
     path_public_key = os.path.join(fldr.UPLOAD_FOLDER, username, 'id_rsa_public.pub')
     path_private_key = os.path.join(fldr.UPLOAD_FOLDER, username, 'id_rsa.pem')
     f = open(path_private_key, "w+")
@@ -256,6 +259,7 @@ def make_key_files(username, private_key, public_key):
     f = open(path_public_key, "w+")
     f.write(public_key)
     f.close()
+    return path_public_key, path_private_key
 
 
 @app.route("/generate", methods=["POST", "GET"])
@@ -263,7 +267,7 @@ def make_key_files(username, private_key, public_key):
 def generate_keys():
     if request.method == "POST":
         private_key, public_key = ED.generate_rsa_pair()
-        make_key_files(current_user.name, private_key,public_key)
+        path_public_key, path_private_key = make_key_files(current_user.name, private_key, public_key)
         try:
             u = User.getUserbyId(current_user.user_id)
             if u is None:
@@ -275,7 +279,7 @@ def generate_keys():
                                    path_private_key=path_private_key)
         except Exception:
             flash("Unexpected error")
-            return render_template("generate.html")
+            return redirect(request.url)
     else:
         return render_template("generate.html")
 
