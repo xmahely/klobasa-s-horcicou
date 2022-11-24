@@ -14,6 +14,20 @@
                 <div class="p-5">
                      <h1>Decrypt your file</h1>
                 </div>
+                <div class="media">
+                    <div class="media-left">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" fill="currentColor" class="bi bi-key-fill" viewBox="0 0 16 16">
+                            <path d="M11 1a2 2 0 0 0-2 2v4a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h5V3a3 3 0 0 1 6 0v4a.5.5 0 0 1-1 0V3a2 2 0 0 0-2-2z"  />
+                        </svg>
+                    </div>
+                    <div class="media-body">
+                        <h4 class="media-heading">Decrypt file</h4>
+                        Encrypted files can also be decrypted. User can provide file with the "File" input box. Firstly the information is loaded from the file header to decrypt with AES-GCM.
+                        If the file is corrupted the process is aborted. Next, the symmetric key from the file header is decrypted by the private key, corresponding to
+                        public key used to encrypt symmetric key. This private key can be loaded by the "Private key" input box. The output file is in the form of plain text and can be downloaded with the "Download file" link.
+                    </div>
+
+                </div>
                 <form action="#" method="post" class="was-validated" enctype="multipart/form-data">
                     <div class="mb-3">
                       <label for="private_key" class="form-label">Private key (.pem) :</label>

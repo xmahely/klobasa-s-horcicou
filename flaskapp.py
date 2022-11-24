@@ -22,7 +22,50 @@ def load_user(user_id):
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    if current_user.is_authenticated:
+        return redirect('homepage')
+    else:
+        return render_template('login.html')
+
+
+@app.route("/buyTickets")
+@login_required
+def buy_tickets():
+    if current_user.is_authenticated:
+        return render_template('buytickets.html')
+    else:
+        return render_template('login.html')
+
+
+@app.route("/buyTimeTickets")
+@login_required
+def buy_timetickets():
+    if current_user.is_authenticated:
+        return render_template('buytimetickets.html')
+    else:
+        return render_template('login.html')
+
+
+@app.route("/tickets")
+@login_required
+def tickets():
+    if current_user.is_authenticated:
+        return render_template('tickets.html')
+    else:
+        return render_template('login.html')
+
+@app.route("/timeTickets")
+@login_required
+def time_tickets():
+    if current_user.is_authenticated:
+        return render_template('timeTickets.html')
+    else:
+        return render_template('login.html')
+
+@login_required
+@app.route("/homepage")
+def homepage():
+    return render_template("index.html", username=current_user.name)
 
 
 @app.route("/register", methods=["POST", "GET"])
@@ -56,7 +99,7 @@ def register():
                 make_key_files(username, private, public)
                 # TODO toto nech neni warning
                 # namalo by sa stat ze existuje uz folder kedze username je unique
-                flash('Registration successful','')
+                flash('Registration successful', '')
                 return render_template('register.html')
             except Exception as e:
                 return render_template("register.html")
@@ -91,7 +134,7 @@ def login():
                 login_user(u)
                 session.pop('counter', None)
                 session.pop('timeout_count', None)
-                return render_template("index.html")
+                return render_template('index.html', username=current_user.name)
             else:
                 flash(f"The username or password is incorrect!")
                 if 'counter' in session:
@@ -111,7 +154,7 @@ def login():
             return redirect(request.url)
     else:
         if current_user.is_authenticated:
-            return redirect(url_for("user"))
+            return render_template('index.html', username=current_user.name)
         return render_template("login.html")
 
 
@@ -126,8 +169,8 @@ def user():
     if current_user.is_authenticated:
         return render_template("user_page.html", username=current_user.name, email=current_user.email,
                                p_key=current_user.pub,
-                               path_public_key = fldr.UPLOAD_FOLDER + current_user.name + "/id_rsa_public.pub",
-                               path_private_key = fldr.UPLOAD_FOLDER + current_user.name + "/id_rsa.pem" )
+                               path_public_key=fldr.UPLOAD_FOLDER + current_user.name + "/id_rsa_public.pub",
+                               path_private_key=fldr.UPLOAD_FOLDER + current_user.name + "/id_rsa.pem")
     else:
         return redirect(url_for("login"))
 
@@ -141,8 +184,8 @@ def allowed_file(file, extension):
 @app.route("/download/<path:path>")
 def download_file(path):
     # todo: pri pridávani na server odkomentovať, musí tam byť /
-    return send_file("/"+path, as_attachment=True)
-    #return send_file(path, as_attachment=True)
+    return send_file("/" + path, as_attachment=True)
+    # return send_file(path, as_attachment=True)
 
 
 @app.route("/download/documentation")
@@ -248,7 +291,6 @@ def decrypt():
 
 
 def make_key_files(username, private_key, public_key):
-
     if not os.path.isdir(os.path.join(fldr.UPLOAD_FOLDER, username)):
         os.mkdir(os.path.join(fldr.UPLOAD_FOLDER, username))
     path_public_key = os.path.join(fldr.UPLOAD_FOLDER, username, 'id_rsa_public.pub')
@@ -289,94 +331,93 @@ def nope():
     return "I give up :("
 
 
-#<input class="textarea form-control" type="textarea" id="text" name="text" rows="4">
-@app.route("/chat/", methods=["POST", "GET"],defaults={'chatterID': 0})
+# <input class="textarea form-control" type="textarea" id="text" name="text" rows="4">
+@app.route("/chat/", methods=["POST", "GET"], defaults={'chatterID': 0})
 @app.route("/chat/<int:chatterID>", methods=["POST", "GET"])
 @login_required
-def chat(chatterID = 0):
-    #print(chatterID)
+def chat(chatterID=0):
+    # print(chatterID)
     if request.method == "POST":
-        
+
         message = request.form.get('message', "error")
         newUser = request.form.get('newUser', chatterID)
-        if (newUser!=chatterID and (User.getIdByUserName(newUser) == None)) or (User.getIdByUserName(newUser) == current_user.user_id):
-            json =getJSON(current_user.user_id)
+        if (newUser != chatterID and (User.getIdByUserName(newUser) == None)) or (
+                User.getIdByUserName(newUser) == current_user.user_id):
+            json = getJSON(current_user.user_id)
             return render_template("chat.html", messages=json, displayUser=chatterID)
         if (message == "error" and newUser != chatterID):
             message = "Hello"
             newUser = User.getIdByUserName(newUser)
-        #Moving forward code
-        #print("TO: ",newUser)
-        #print("FROM: ",current_user.user_id)
+        # Moving forward code
+        # print("TO: ",newUser)
+        # print("FROM: ",current_user.user_id)
 
         public_key_path = ("tmp/public_key.pub")
 
-            
-
         text_file_string = message
 
-        
         public_key_string = data_handler.read_public_key3(User.getPublicKey(newUser))
-        #print(public_key_string)
+        # print(public_key_string)
         if not public_key_string:
             flash('Key has to have correct format !')
             return redirect(request.url)
         else:
             encrypted_text_string = ED.encrypt_file(text_file_string, public_key_string)
             unique_filename = str(uuid.uuid4())
-            path = os.path.join(fldr.UPLOAD_FOLDER,'messages', unique_filename)
+            path = os.path.join(fldr.UPLOAD_FOLDER, 'messages', unique_filename)
             f = open(path, "w+")
             f.write(encrypted_text_string)
             f.close()
-            
 
-
-        
         Message.create(current_user.user_id, newUser, path)
-        json =getJSON(current_user.user_id)
-        #print(selectMessages(1))
+        json = getJSON(current_user.user_id)
+        # print(selectMessages(1))
         return render_template("chat.html", messages=json, displayUser=chatterID)
     else:
 
-
-        
-        json =getJSON(current_user.user_id)
-        #print(selectMessages(1))
+        json = getJSON(current_user.user_id)
+        # print(selectMessages(1))
         return render_template("chat.html", messages=json, displayUser=chatterID)
+
 
 def getJSON(user_ID):
     struct = {}
     try:
         messages = selectMessages(user_ID)
-        #print(messages)
+        # print(messages)
         for message in messages:
-            
-            #private_key_path = ("tmp/private_key.pem")
-            #private_key_string = data_handler.read_private_key2(private_key_path)
+
+            # private_key_path = ("tmp/private_key.pem")
+            # private_key_string = data_handler.read_private_key2(private_key_path)
             private_key_string = data_handler.read_private_key3(User.getPrivateKey(message.recipient_ID))
-            
+
             fp = open(message.messageLocation, 'r')
             message_string = fp.read()
-            
-            fp.close() 
-            decrypted_text_string = ED.decrypt_file(message_string , private_key_string)
-            #print(message.recipient_ID)
-            if (message.sender_ID==user_ID):
-                #print(message.messageLocation)
-                struct.setdefault(message.recipient_ID,[]).append(tuple((User.getUserNameById(message.sender_ID), decrypted_text_string)))
-            if (message.recipient_ID==user_ID):
-                #print(message.messageLocation)
-                struct.setdefault(message.sender_ID,[]).append(tuple((User.getUserNameById(message.sender_ID), decrypted_text_string)))
-            
-        #print(struct)
-        #print(jsonData)
+
+            fp.close()
+            decrypted_text_string = ED.decrypt_file(message_string, private_key_string)
+            # print(message.recipient_ID)
+            if (message.sender_ID == user_ID):
+                # print(message.messageLocation)
+                struct.setdefault(message.recipient_ID, []).append(
+                    tuple((User.getUserNameById(message.sender_ID), decrypted_text_string)))
+            if (message.recipient_ID == user_ID):
+                # print(message.messageLocation)
+                struct.setdefault(message.sender_ID, []).append(
+                    tuple((User.getUserNameById(message.sender_ID), decrypted_text_string)))
+
+        # print(struct)
+        # print(jsonData)
         return struct
     except:
         print("OH MY LAWRD")
         return struct
+
+
 @app.template_global()
 def getUserName(id):
     return User.getUserNameById(id)
+
 
 # TODO deactivate user .. delete from db and delete system folder
 
@@ -385,7 +426,6 @@ if __name__ == "__main__":
     app.jinja_env.globals.update(getUserName=getUserName)
     with app.app_context():
         db.create_all()
-    
+
     app.debug = True
     app.run(host='0.0.0.0')
-    

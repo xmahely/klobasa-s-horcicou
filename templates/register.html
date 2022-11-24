@@ -66,8 +66,9 @@
                                     <input type="checkbox" onclick="myFunction('password2')"> Show Password
                                 </div>
                             </div>
-
-                            <ul class="list-unstyled">
+                        </div>
+                         <div class="container-fluid mx-auto">
+                                 <ul class="list-unstyled text-left">
                                                     <li class="">
                                                         <span class="low-upper-case">
                                                             <i class="fas fa-circle" aria-hidden="true"></i>
@@ -88,18 +89,23 @@
                                                         </span>
                                                     </li>
                                                 </ul>
-
-                             <div class="mt-3" style="padding-bottom: 50px;">
+                            </div>
+                         <div class="mt-3" style="padding-bottom: 50px;">
                                 <div class="row justify-content-center">
                                     <div class="form-group col-sm-6">
                                         <button type="submit" class="btn btn-outline-secondary" onclick="check()">Submit </button>
                                     </div>
                                 </div>
                             </div>
-                        </div>
                     </div>
 
+
                   </form>
+                <div>
+                    <p>
+                        Already have an account? Login <a href="{{url_for('login')}}">here</a>
+                    </p>
+                </div>
             </div>
         </div>
     </div>

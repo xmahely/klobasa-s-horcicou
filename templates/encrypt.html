@@ -14,6 +14,20 @@
                 <div class="p-5">
                      <h1>Encrypt your file</h1>
                 </div>
+                <div class="media">
+                    <div class="media-left">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" fill="currentColor" class="bi bi-key-fill" viewBox="0 0 16 16">
+                            <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+                        </svg>
+                    </div>
+                    <div class="media-body my-5">
+                        <h4 class="media-heading">Encrypt file</h4>
+                        This feature allow user to encrypt a file. The user can select file with the "File" input box. The file is encypted with a random symmetric key. This key is encrypted by RSA assymetric key, provided by the user in the "Public key" input box.
+                        This encypted symmetic key is then put in the output file header.
+                        Lastly the file is encrypted by AES-GCM block cipher. The data needed for AES-GCM decryption are also included in the file header.
+                        Output file is in base64 encoding and can be downloaded by clicking on the link "Download file".
+                    </div>
+                </div>
                 <form action="#" method="post" class="was-validated" enctype="multipart/form-data">
                     <div class="mb-3">
                       <label for="public_key" class="form-label">Public key (.pub) :</label>
