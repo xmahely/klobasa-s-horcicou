@@ -1,15 +1,16 @@
 import os
-from flask import Flask, redirect, url_for, render_template, request, flash, send_file, session
+from flask import redirect, url_for, render_template, request, flash, send_file, session
 from werkzeug.exceptions import RequestEntityTooLarge
 from flask_login import current_user, login_user, logout_user, login_required
 import fldr
 import data_handler
 import encrypt_decrypt as ED
-from app_config import app, db, login, User, Message, selectMessages
+from app_config import app, db, login
+from Udb.message_model import Message
+from Udb.user_model import User
 import uuid
 from datetime import datetime, timedelta
 from pytz import utc
-import json
 
 with app.app_context():
     db.create_all()
@@ -25,7 +26,7 @@ def home():
     if current_user.is_authenticated:
         return redirect('homepage')
     else:
-        return render_template('login.html')
+        return redirect('login')
 
 
 @app.route("/buyTickets")
@@ -50,7 +51,13 @@ def buy_timetickets():
 @login_required
 def tickets():
     if current_user.is_authenticated:
-        return render_template('tickets.html')
+        user = User.getUserbyId(current_user.user_id)
+        if user.ticket is None:
+            return render_template('tickets.html')
+        else:
+            ticket = user.ticket
+            return render_template('tickets.html', _id=ticket.ticket_id, _time=ticket.time,
+                                   _valid_from=ticket.valid_from, _valid_to=ticket.valid_to)
     else:
         return render_template('login.html')
 
@@ -58,7 +65,13 @@ def tickets():
 @login_required
 def time_tickets():
     if current_user.is_authenticated:
-        return render_template('timeTickets.html')
+        user = User.getUserbyId(current_user.user_id)
+        if user.timeTicket is None:
+            return render_template('timeTickets.html')
+        else:
+            ticket = user.timeTicket
+            return render_template('timeTickets.html',_id=ticket.ticket_id, _time=ticket.season,
+                                   _valid_from=ticket.valid_from,_valid_to=ticket.valid_to,_status=ticket.status)
     else:
         return render_template('login.html')
 
@@ -383,7 +396,7 @@ def chat(chatterID=0):
 def getJSON(user_ID):
     struct = {}
     try:
-        messages = selectMessages(user_ID)
+        messages = Message.selectMessages(user_ID)
         # print(messages)
         for message in messages:
 
@@ -419,7 +432,7 @@ def getUserName(id):
     return User.getUserNameById(id)
 
 
-# TODO deactivate user .. delete from db and delete system folder
+# TODO deactivate user .. delete from Udb and delete system folder
 
 
 if __name__ == "__main__":
