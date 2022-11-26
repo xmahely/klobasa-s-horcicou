@@ -3,105 +3,119 @@
 {% block content %}
       <div class="container-fluid mx-auto">
         <div class="row d-flex justify-content-center text-center">
-                <div class="jumbotron-fluid mt-4 ">
-                    <h1> Hello: {{ username }} ! </h1>
-                     <p> Email: {{ email }}</p>
-                     <p> Your public key: <a class="link-info" href="{{url_for('download_file', path=path_public_key)}}"> id_rsa_public.pub </a> </p>
-                     <p> Your private key: <a class="link-info" href="{{url_for('download_file', path=path_private_key)}}">id_rsa.pem</a> </p>
+            <div class="jumbotron-fluid mt-4 ">
+                <div class="p-5">
+                    <h1> Hello {{ username }} ! </h1>
                 </div>
-        <div class="container-fluidjustify-content-stretch">
-            <div class="card-deck my-3">
-                <div class="row gy-3">
-                    <div class="col-sm">
-                        <div class="card my-5 h-80 bg-light border-secondary" style="padding-bottom: 50px">
-                           <div class="align-items-center">
-                               <a class="stretched-link text-decoration-none" href="/timeTickets"></a>
-                               <div class="card-header">
-                                     <h4 class="my-0 font-weight-normal">Moje električenky</h4>
-                               </div>
-                               <div class="card-body">
-                                    <h4 class="card-title"> ... </h4>
-                               </div>
-                           </div>
-                       </div>
-                    </div>
-                    <div class="col-sm">
-                        <div class="card my-5 h-80 bg-light border-secondary" style="padding-bottom: 50px">
-                           <div class="align-items-center">
-                               <a class="stretched-link text-decoration-none" href="/tickets"></a>
-                               <div class="card-header">
-                                     <h4 class="my-0 font-weight-normal">Moje lístky</h4>
-                               </div>
-                               <div class="card-body" >
-                                    <h4 class="card-title"> ... </h4>
-                               </div>
-                           </div>
-                       </div>
-                    </div>
-                 </div>
+                <div class="p-2"> Email: {{ email }}</div>
+                <div class="p-2"> Your public key:
+                    <a class="link-info" href="{{url_for('download_file', path=path_public_key)}}"> id_rsa_public.pub
+                    </a> </div>
+                <div class="p-2"> Your private key:
+                    <a class="link-info" href="{{url_for('download_file', path=path_private_key)}}">id_rsa.pem
+                    </a> </div>
             </div>
         </div>
-
-                <div class="container-fluid mt-3 " style="padding-bottom: 50px">
-                   <div class="card mt-3" style="padding: 15px 15px 15px 15px; background-color: #699DFF">
-                       <div class="d-flex align-items-center">
-                           <a class="stretched-link link-dark text-decoration-none" href="/generate"> <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="currentColor" class="card-img-left " viewBox="0 0 16 16">
-                            <path d="M3.5 11.5a3.5 3.5 0 1 1 3.163-5H14L15.5 8 14 9.5l-1-1-1 1-1-1-1 1-1-1-1 1H6.663a3.5 3.5 0 0 1-3.163 2zM2.5 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path>
-                           </svg></a>
-                           <div class="card-body text-left">
-                                <h4 class="card-title">Generate new RSA keys</h4>
-                           </div>
+        <div class="row d-flex justify-content-center text-center">
+            <div class="col col-lg-5">
+                <div class="card my-5 h-80 bg-light border-secondary" style="padding-bottom: 50px">
+                   <div class="align-items-center">
+                       <div class="card-header">
+                             <h4 class="my-0 font-weight-normal">My season tickets</h4>
+                       </div>
+                       <div class="card-body">
+                            <h4 class="card-title"> ... </h4>
                        </div>
                    </div>
-                     <div class="card mt-3" style="padding: 15px 15px 15px 15px; background-color: #699DFF">
-                       <div class="d-flex align-items-center">
-                           <a class="stretched-link link-dark text-decoration-none" href="/encrypt"> <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="currentColor" class="card-img-right" viewBox="0 0 16 16">
-                            <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"></path>
-                        </svg></a>
-                           <div class="card-body text-left">
-                                <h4 class="card-title">Encrypt file</h4>
-                           </div>
-                       </div>
-                   </div>
-                     <div class="card mt-3" style="padding: 15px 15px 15px 15px; background-color: #699DFF">
-                       <div class="d-flex align-items-center">
-                           <a class="stretched-link link-dark text-decoration-none" href="/decrypt"> <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="currentColor" class="card-img-right" viewBox="0 0 16 16">
-                            <path d="M11 1a2 2 0 0 0-2 2v4a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h5V3a3 3 0 0 1 6 0v4a.5.5 0 0 1-1 0V3a2 2 0 0 0-2-2z"  />
-                        </svg></a>
-                           <div class="card-body text-left">
-                                <h4 class="card-title">Decrypt file</h4>
-                           </div>
-                       </div>
-                   </div>
-
-                    <div class="card mt-3" style="padding: 15px 15px 15px 15px; background-color: #699DFF">
-                       <div class="d-flex align-items-center">
-                           <a class="stretched-link link-dark text-decoration-none" href="/chat">
-                               <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                   <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-                               </svg>
-                           </a>
-                           <div class="card-body text-left">
-                                <h4 class="card-title">Chat</h4>
-                           </div>
-                       </div>
-                   </div>
-
-                    <div class="card mt-3" style="padding: 15px 15px 15px 15px; background-color: #E6A720">
-                       <div class="d-flex align-items-center">
-                           <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="currentColor" class="card-img-right" viewBox="0 0 16 16">
-                               <path d="M2.5 4a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1zm2-.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm1 .5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
-                               <path d="M2 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2H2zm13 2v2H1V3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1zM2 14a1 1 0 0 1-1-1V6h14v7a1 1 0 0 1-1 1H2z"/></svg>
-                           <div class="card-body text-left">
-                                <h4 class="card-title">Download application and documentation</h4>
-                                <p>The offline application is available, if the user wish not to send his key to the website. It can be used to encrypt, decrypt and generatin RSA key pairs.</p>
-                                <a href="{{url_for('download_enc_tool')}}" class="card-link"> Application</a>
-                                <a href="{{url_for('download_documentation')}}" class="card-link"> Documentation</a>
-                           </div>
-                       </div>
-                   </div>
-
                 </div>
+            </div>
+        </div>
+        <div class="row d-flex justify-content-center text-center">
+            <div class="col col-lg-5">
+                <div class="card my-5 h-80 bg-light border-secondary" style="padding-bottom: 50px">
+                   <div class="align-items-center">
+                       <div class="card-header">
+                             <h4 class="my-0 font-weight-normal">My tickets</h4>
+                       </div>
+                       <div class="card-body" >
+                          {% include "tickets.html" %}
+                          {% block ticket_content %}{% endblock %}
+                       </div>
+                   </div>
+               </div>
+            </div>
+        </div>
+        <div class="row d-flex justify-content-center text-center " style="padding-bottom: 50px">
+           <div class="col col-lg-5 rounded" style=" background-color: #699DFF">
+               <a class="link-dark text-decoration-none" href="/generate">
+                   <div class="d-flex align-items-center p-3">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="card-img-left " viewBox="0 0 16 16">
+                            <path d="M3.5 11.5a3.5 3.5 0 1 1 3.163-5H14L15.5 8 14 9.5l-1-1-1 1-1-1-1 1-1-1-1 1H6.663a3.5 3.5 0 0 1-3.163 2zM2.5 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path>
+                           </svg>
+                       <div class="card-body text-left">
+                            <h4 class="card-title">Generate new RSA keys</h4>
+                       </div>
+                   </div>
+                </a>
+            </div>
+        </div>
+        <div class="row d-flex justify-content-center text-center " style="padding-bottom: 50px">
+            <div class="col col-lg-5 rounded" style=" background-color: #699DFF">
+               <a class="link-dark text-decoration-none" href="/encrypt">
+                   <div class="d-flex align-items-center p-3">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="card-img-left " viewBox="0 0 16 16">
+                         <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"></path>
+                       </svg>
+                       <div class="card-body text-left">
+                            <h4 class="card-title">Encrypt file</h4>
+                       </div>
+                   </div>
+                </a>
+            </div>
+        </div>
+        <div class="row d-flex justify-content-center text-center " style="padding-bottom: 50px">
+            <div class="col col-lg-5 rounded" style=" background-color: #699DFF">
+               <a class="link-dark text-decoration-none" href="/decrypt">
+                   <div class="d-flex align-items-center p-3">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="card-img-left " viewBox="0 0 16 16">
+                        <path d="M11 1a2 2 0 0 0-2 2v4a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h5V3a3 3 0 0 1 6 0v4a.5.5 0 0 1-1 0V3a2 2 0 0 0-2-2z"></path>
+                       </svg>
+                       <div class="card-body text-left">
+                            <h4 class="card-title">Decrypt file</h4>
+                       </div>
+                   </div>
+                </a>
+            </div>
+        </div>
+        <div class="row d-flex justify-content-center text-center " style="padding-bottom: 50px">
+            <div class="col col-lg-5 rounded" style=" background-color: #699DFF">
+               <a class="link-dark text-decoration-none" href="/chat">
+                   <div class="d-flex align-items-center p-3">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                           <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                       </svg>
+                       <div class="card-body text-left">
+                            <h4 class="card-title">Chat room</h4>
+                       </div>
+                   </div>
+                </a>
+            </div>
+        </div>
+        <div class="row d-flex justify-content-center text-center " style="padding-bottom: 50px">
+            <div class="col col-lg-5 rounded" style=" background-color: #E6A720">
+                   <div class="d-flex align-items-center p-3">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="card-img-right" viewBox="0 0 16 16">
+                           <path d="M2.5 4a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1zm2-.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm1 .5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"></path>
+                           <path d="M2 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2H2zm13 2v2H1V3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1zM2 14a1 1 0 0 1-1-1V6h14v7a1 1 0 0 1-1 1H2z"></path>
+                       </svg>
+                        <div class="card-body text-left">
+                            <h4 class="card-title">Download application and documentation</h4>
+                            <p>The offline application is available, if the user wish not to send his key to the website. It can be used to encrypt, decrypt and generatin RSA key pairs.</p>
+                            <a href="{{url_for('download_enc_tool')}}" class="card-link"> Application</a>
+                            <a href="{{url_for('download_documentation')}}" class="card-link"> Documentation</a>
+                   </div>
+                   </div>
+           </div>
         </div>
     </div>
 {% endblock %}

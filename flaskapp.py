@@ -1,24 +1,62 @@
 import os
+import time
+
 from flask import redirect, url_for, render_template, request, flash, send_file, session
 from werkzeug.exceptions import RequestEntityTooLarge
 from flask_login import current_user, login_user, logout_user, login_required
 import fldr
 import data_handler
 import encrypt_decrypt as ED
-from app_config import app, db, login
+from app_config import app, db, login, turbo
+from Udb import no_ticket_model, ticket_model
 from Udb.message_model import Message
 from Udb.user_model import User
+from Udb.no_ticket_model import no_ticket
 import uuid
 from datetime import datetime, timedelta
 from pytz import utc
-
-with app.app_context():
-    db.create_all()
-
+import threading
 
 @login.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+@turbo.user_id
+def get_user_id():
+    if current_user is None:
+        return None
+    if current_user.is_authenticated:
+        return current_user.user_id
+    else:
+        return None
+
+
+with app.app_context():
+    # db.drop_all() # toto používať len na premazenia celej db
+    db.create_all()
+    # no_ticket_model.create_ticket_types()
+
+def get_tickets():
+    print(current_user, flush=True)
+    ticket_model.tag_inactive_tickets()
+    # return ticket_model.get_user_tickets(current_user.user_id)
+    return ticket_model.get_user_tickets(1)
+
+@app.context_processor
+def inject_load():
+    return {'tickets': get_tickets(), 'now': datetime.now().replace(tzinfo=None)}
+
+def update_load():
+    with app.app_context():
+        while True:
+            time.sleep(1)
+            turbo.push(turbo.replace(render_template('tickets.html'), 'load_ticket'))
+
+
+@app.before_first_request
+def before_first_request():
+    print(current_user, flush=True)
+    threading.Thread(target=update_load).start()
 
 
 @app.route("/")
@@ -29,49 +67,30 @@ def home():
         return redirect('login')
 
 
+@app.route("/cpkNkWrXsl/buy/<int:ticket_type>")
+@login_required
+def buy_ticket(ticket_type):
+    if current_user.is_authenticated:
+        ticket_model.create_new(current_user.user_id, ticket_type)
+        return redirect(url_for('user'))
+    else:
+        return render_template('login.html')
+
+
 @app.route("/buyTickets")
 @login_required
 def buy_tickets():
     if current_user.is_authenticated:
-        return render_template('buytickets.html')
+        return render_template('buytickets.html', tickets=no_ticket_model.get_tickets())
     else:
         return render_template('login.html')
 
 
-@app.route("/buyTimeTickets")
+@app.route("/buySeasonTickets")
 @login_required
-def buy_timetickets():
+def buy_seasontickets():
     if current_user.is_authenticated:
-        return render_template('buytimetickets.html')
-    else:
-        return render_template('login.html')
-
-
-@app.route("/tickets")
-@login_required
-def tickets():
-    if current_user.is_authenticated:
-        user = User.getUserbyId(current_user.user_id)
-        if user.ticket is None:
-            return render_template('tickets.html')
-        else:
-            ticket = user.ticket
-            return render_template('tickets.html', _id=ticket.ticket_id, _time=ticket.time,
-                                   _valid_from=ticket.valid_from, _valid_to=ticket.valid_to)
-    else:
-        return render_template('login.html')
-
-@app.route("/timeTickets")
-@login_required
-def time_tickets():
-    if current_user.is_authenticated:
-        user = User.getUserbyId(current_user.user_id)
-        if user.timeTicket is None:
-            return render_template('timeTickets.html')
-        else:
-            ticket = user.timeTicket
-            return render_template('timeTickets.html',_id=ticket.ticket_id, _time=ticket.season,
-                                   _valid_from=ticket.valid_from,_valid_to=ticket.valid_to,_status=ticket.status)
+        return render_template('buyseasontickets.html', tickets=no_ticket_model.get_season_tickets())
     else:
         return render_template('login.html')
 
@@ -147,7 +166,7 @@ def login():
                 login_user(u)
                 session.pop('counter', None)
                 session.pop('timeout_count', None)
-                return render_template('index.html', username=current_user.name)
+                return redirect(url_for('homepage'))
             else:
                 flash(f"The username or password is incorrect!")
                 if 'counter' in session:
@@ -167,14 +186,15 @@ def login():
             return redirect(request.url)
     else:
         if current_user.is_authenticated:
-            return render_template('index.html', username=current_user.name)
+            return render_template('user_page.html', username=current_user.name, reload=False)
         return render_template("login.html")
 
 
 @app.route("/logout")
+@login_required
 def logout():
     logout_user()
-    return redirect(url_for("login"))
+    return redirect(url_for('login'))
 
 
 @app.route("/user")
@@ -183,7 +203,7 @@ def user():
         return render_template("user_page.html", username=current_user.name, email=current_user.email,
                                p_key=current_user.pub,
                                path_public_key=fldr.UPLOAD_FOLDER + current_user.name + "/id_rsa_public.pub",
-                               path_private_key=fldr.UPLOAD_FOLDER + current_user.name + "/id_rsa.pem")
+                               path_private_key=fldr.UPLOAD_FOLDER + current_user.name + "/id_rsa.pem", reload=False)
     else:
         return redirect(url_for("login"))
 
@@ -430,7 +450,6 @@ def getJSON(user_ID):
 @app.template_global()
 def getUserName(id):
     return User.getUserNameById(id)
-
 
 # TODO deactivate user .. delete from Udb and delete system folder
 

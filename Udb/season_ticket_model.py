@@ -1,7 +1,7 @@
 from app_config import db
 
 
-class timeTicket(db.Model):
+class season_ticket(db.Model):
 
     ticket_id = db.Column('ticket_id', db.Integer, primary_key=True)
     season = db.Column('season', db.Integer)

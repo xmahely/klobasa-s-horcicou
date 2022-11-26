@@ -1,20 +1,21 @@
-{% extends "base.html" %}
-{% block title %}My Tickets{% endblock %}
-{% block content %}
-<div class="container-fluid mx-auto">
-        <div class="row d-flex my-4 justify-content-center text-center">
-            <h4> Moje lístky</h4>
-             <div class="container-fluid mx-auto">
-                 <div class="card">
-                        <div class="card-body">
-                            <p> ID:  {{ _id }}  </p>
-                            <p> Platnosť:  {{ _type }}  </p>
-                            <p> Platný od: {{ _valid_from }}   </p>
-                            <p> Platný do:  {{ _valid_to }}  </p>
-                            <!-- QR kód zobrazenie iab na určitý čas-->
-                        </div>
-                    </div>
-             </div>
+<div id="load_ticket" class="load_ticket">
+    {%for ticket in tickets %}
+        {% set time =  (ticket.valid_to - now).total_seconds() %}
+        {% set sec = time % (24 * 3600) %}
+        {% set hour =  sec // 3600 %}
+        {% set sec = sec % 3600 %}
+        {% set minutes =  sec // 60 %}
+        {% set sec = sec % 60 %}
+        {% set duration = '{:00.0f}'.format(hour)+':'+'{:00.0f}'.format(minutes)+':'+'{:00.0f}'.format(sec) %}
+        {% set valid_from = (ticket.valid_from).strftime("%d.%m.%Y %H:%M:%S") %}
+        {% set valid_to =  (ticket.valid_to).strftime("%d.%m.%Y %H:%M:%S") %}
+        <div class="row p-2">
+            <div class="col-3"> <img src="{{ qrcode(ticket.qr_text) }}" class="img-thumbnail"></div>
+            <div class="col-7 text-start p-4">
+                <div class="p-1">Status: <span class="text-success">active for {{duration }} </span></div>
+                <div class="p-1">Valid from: {{ valid_from }}</div>
+                <div class="p-1">Valid to: {{ valid_to }}</div>
+            </div>
         </div>
+    {%endfor%}
 </div>
-{% endblock %}
