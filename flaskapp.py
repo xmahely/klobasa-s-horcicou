@@ -26,7 +26,8 @@ def load_user(user_id):
 with app.app_context():
     # db.drop_all() # toto používať len na premazenia celej db
     db.create_all()
-    no_ticket_model.create_ticket_types()
+    # todo použiť len vtedy, ak sa použije drop_all() alebo ak ešte nemáte naplnenu tabulku no_ticket
+    #no_ticket_model.create_ticket_types()
 
 @app.route('/getTickets<int:user_id>')
 def get_tickets(user_id):
