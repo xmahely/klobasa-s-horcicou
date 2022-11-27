@@ -1,62 +1,65 @@
 import os
 import time
-
-from flask import redirect, url_for, render_template, request, flash, send_file, session
+from flask import redirect, url_for, render_template, request, flash, send_file, session, make_response
 from werkzeug.exceptions import RequestEntityTooLarge
 from flask_login import current_user, login_user, logout_user, login_required
 import fldr
 import data_handler
 import encrypt_decrypt as ED
-from app_config import app, db, login, turbo
+from app_config import app, db, login, socketio, emit
 from Udb import no_ticket_model, ticket_model
 from Udb.message_model import Message
 from Udb.user_model import User
 from Udb.no_ticket_model import no_ticket
+import random
+import string
 import uuid
 from datetime import datetime, timedelta
 from pytz import utc
-import threading
+import functools
+from threading import Thread, Event
+thread = Thread()
+thread_stop_event = Event()
+thread = None
 
 @login.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
-@turbo.user_id
-def get_user_id():
-    if current_user is None:
-        return None
-    if current_user.is_authenticated:
-        return current_user.user_id
-    else:
-        return None
-
 
 with app.app_context():
     # db.drop_all() # toto používať len na premazenia celej db
     db.create_all()
     # no_ticket_model.create_ticket_types()
 
-def get_tickets():
-    print(current_user, flush=True)
-    ticket_model.tag_inactive_tickets()
-    # return ticket_model.get_user_tickets(current_user.user_id)
-    return ticket_model.get_user_tickets(1)
-
-@app.context_processor
-def inject_load():
-    return {'tickets': get_tickets(), 'now': datetime.now().replace(tzinfo=None)}
-
-def update_load():
-    with app.app_context():
-        while True:
-            time.sleep(1)
-            turbo.push(turbo.replace(render_template('tickets.html'), 'load_ticket'))
+@app.route('/getTickets<int:user_id>')
+def get_tickets(user_id):
+    return ticket_model.get_user_tickets(user_id)
 
 
-@app.before_first_request
-def before_first_request():
-    print(current_user, flush=True)
-    threading.Thread(target=update_load).start()
+@app.route('/getSeasonTickets<int:user_id>')
+def get_season_tickets(user_id):
+    return ticket_model.get_user_season_tickets(user_id)
+
+def startTask():
+    while not thread_stop_event.isSet():
+        with app.app_context():
+            time = str(datetime.now().replace(tzinfo=None))
+            socketio.emit('load_time', {'time': time}, namespace='/')
+            socketio.sleep(1)
+
+
+@socketio.on('connect', namespace='/')
+def connect():
+    global thread
+    print('Client connected')
+    if thread is None:
+        print("Starting Thread")
+        thread = socketio.start_background_task(startTask)
+
+
+@socketio.on('disconnect', namespace='/')
+def disconnect():
+    print('Client disconnected')
 
 
 @app.route("/")
@@ -67,11 +70,24 @@ def home():
         return redirect('login')
 
 
-@app.route("/cpkNkWrXsl/buy/<int:ticket_type>")
+@app.route("/"+''.join(random.choice(string.ascii_lowercase) for i in range(50))+"/buy/<int:ticket_type>")
 @login_required
 def buy_ticket(ticket_type):
     if current_user.is_authenticated:
+
         ticket_model.create_new(current_user.user_id, ticket_type)
+        return redirect(url_for('user'))
+    else:
+        return render_template('login.html')
+
+
+@app.route("/"+''.join(random.choice(string.ascii_lowercase) for i in range(50))+"/buySeason/<int:ticket_type>", methods=["POST"])
+@login_required
+def buy_season_ticket(ticket_type):
+    if current_user.is_authenticated:
+        ticket_model.create_new_season(current_user.user_id, ticket_type, request.form["first_name"],
+                                       request.form["last_name"], request.form["city"],
+                                       request.form["card_number"])
         return redirect(url_for('user'))
     else:
         return render_template('login.html')
@@ -94,6 +110,7 @@ def buy_seasontickets():
     else:
         return render_template('login.html')
 
+
 @login_required
 @app.route("/homepage")
 def homepage():
@@ -115,8 +132,8 @@ def register():
             flash('This username already exists, try a new one!')
         elif existing_email:
             flash('This email address is already in use!')
-        elif check == 1:
-            flash('Password too weak')
+        # elif check == 1:
+        #     flash('Password too weak')
         elif check == -1:
             flash('Passwords do not match')
         else:
@@ -164,6 +181,9 @@ def login():
                               f"{session.get('timeout').strftime('%d.%m.%Y %H:%M:%S')}.")
                         return redirect(request.url)
                 login_user(u)
+                if 'id' in session:
+                    session.pop('id', None)
+                session['id'] = u.user_id
                 session.pop('counter', None)
                 session.pop('timeout_count', None)
                 return redirect(url_for('homepage'))
@@ -194,16 +214,20 @@ def login():
 @login_required
 def logout():
     logout_user()
+    session.pop('id', None)
     return redirect(url_for('login'))
 
 
 @app.route("/user")
 def user():
     if current_user.is_authenticated:
+
         return render_template("user_page.html", username=current_user.name, email=current_user.email,
                                p_key=current_user.pub,
                                path_public_key=fldr.UPLOAD_FOLDER + current_user.name + "/id_rsa_public.pub",
-                               path_private_key=fldr.UPLOAD_FOLDER + current_user.name + "/id_rsa.pem", reload=False)
+                               path_private_key=fldr.UPLOAD_FOLDER + current_user.name + "/id_rsa.pem",
+                               tickets=get_tickets(current_user.user_id),
+                               season_tickets=get_season_tickets(current_user.user_id))
     else:
         return redirect(url_for("login"))
 
@@ -451,6 +475,7 @@ def getJSON(user_ID):
 def getUserName(id):
     return User.getUserNameById(id)
 
+
 # TODO deactivate user .. delete from Udb and delete system folder
 
 
@@ -460,4 +485,5 @@ if __name__ == "__main__":
         db.create_all()
 
     app.debug = True
-    app.run(host='0.0.0.0')
+    # app.run(host='0.0.0.0')
+    socketio.run(app)

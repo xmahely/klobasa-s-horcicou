@@ -6,11 +6,10 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_sqlalchemy import SQLAlchemy
 import encrypt_decrypt as ED
-from turbo_flask import Turbo
 from flask_qrcode import QRcode
+from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
-turbo = Turbo(app)
 login = LoginManager(app)
 login.session_protection = 'strong'
 login.init_app(app)
@@ -24,6 +23,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://db_user:ghpeworvaozzks@
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://dbadmin:ghpeworvaozzks@localhost/upb'
 db = SQLAlchemy(app)
 qrcode = QRcode(app)
+socketio = SocketIO(app, async_mode="threading")
+
 # limiter = Limiter(
 #     app,
 #     key_func=get_remote_address,

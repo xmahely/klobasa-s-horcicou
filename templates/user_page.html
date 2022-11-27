@@ -24,7 +24,8 @@
                              <h4 class="my-0 font-weight-normal">My season tickets</h4>
                        </div>
                        <div class="card-body">
-                            <h4 class="card-title"> ... </h4>
+                            {% include "seasonTickets.html" %}
+                          {% block season_ticket_content %}{% endblock %}
                        </div>
                    </div>
                 </div>

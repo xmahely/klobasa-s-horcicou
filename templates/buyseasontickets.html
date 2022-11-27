@@ -1,15 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Buy Time Tickets{% endblock %}
+{% block title %}My Tickets{% endblock %}
 {% block content %}
 <div class="container-fluid mx-auto">
         <div class="row d-flex my-4 justify-content-center text-center">
-           <div class="col-6">
+            <div class="col-6">
                 <h4>Buy season ticket</h4>
-                   <div class="container">
+                <div class="container">
                       <div class="card-deck mb-3 text-center">
 
                       {%for ticket in tickets %}
-                           {%if ticket.duration_metric == 'm' %}
+                            {%if ticket.duration_metric == 'm' %}
                                 {% set duration =  '{:0.0f}'.format(ticket.duration / 60) + ' minutes' %}
                             {%elif ticket.duration_metric == 'h'%}
                                 {% set duration =  '{:0.0f}'.format(ticket.duration / 3600) + ' hours' %}
@@ -30,8 +30,57 @@
                                 <ul class="list-unstyled mt-3 mb-4">
                                   <li>Zones: {{ ticket.zones }}</li>
                                 </ul>
-                                <button type="button" class="btn btn-lg btn-block btn-outline-primary">Buy</button>
+                                <button type="button" class="btn btn-lg btn-block btn-outline-primary"
+                                   data-bs-toggle="modal" data-bs-target="#payModal{{ ticket.ticket_type_id }}">Buy</button>
                               </div>
+                        </div>
+                          <div class="modal fade" id="payModal{{ ticket.ticket_type_id }}" tabindex="-1"
+                               aria-labelledby="payModal{{ ticket.ticket_type_id }}label" aria-hidden="true">
+                          <div class="modal-dialog">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="payModal{{ ticket.ticket_type_id }}label">Payment</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+                            <form action="{{ url_for('buy_season_ticket', ticket_type=ticket.ticket_type_id)}}"
+                                  method="post" enctype="multipart/form-data">
+                              <div class="modal-body">
+                                    <h4 class="p-2"></h4>
+                                    <div class="p-2">
+{#                                        <form action="#" method="post" enctype="multipart/form-data">#}
+                                            <div class="p-1">
+                                                 <label for="first_name" class="form-label">First name :</label>
+                                            <input class="form-control" type="text" id="first_name" name ="first_name" required>
+                                            </div>
+                                            <div class="p-1">
+                                            <label for="last_name" class="form-label">Last name :</label>
+                                            <input class="form-control" type="text" id="last_name" name ="last_name" required>
+                                            </div>
+                                            <div class="p-1">
+                                            <label for="city" class="form-label">City :</label>
+                                            <input class="form-control" type="text" id="city" name ="city" required>
+                                            </div>
+                                            <div class="p-1">
+                                            <label for="card_number" class="form-label">ID card number :</label>
+                                            <input class="form-control" type="text" id="card_number" name ="card_number" required>
+                                             </div>
+                                            <div class="p-1">
+                                            <input type="radio" class="form-check-input" id="radio1" name="optradio" value="option1" checked>
+                                            Test payment
+                                            <label class="form-check-label" for="radio1"></label>
+                                            </div>
+{#                                        </form>#}
+                                    </div>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+{#                                <a type="button" class="btn btn-primary" href = "{{ url_for('buy_season_ticket', ticket_type=ticket.ticket_type_id)}}">#}
+{#                                    Pay €{{ ticket.price }}</a>#}
+                                  <input type="submit" class="btn btn-primary" value="Pay €{{ ticket.price }}">
+                              </div>
+                            </form>
+                            </div>
+                          </div>
                         </div>
                       {%endfor%}
                       </div>
@@ -39,4 +88,12 @@
             </div>
         </div>
 </div>
+    <script>
+    const payModal = document.getElementById('payModal')
+    const payInput = document.getElementById('payInput')
+
+    payModal.addEventListener('shown.bs.modal', () => {
+      payInput.focus()
+    })
+    </script>
 {% endblock %}

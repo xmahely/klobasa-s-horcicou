@@ -1,5 +1,5 @@
 <div>
-    {%for ticket in tickets %}
+    {%for ticket in season_tickets %}
         {% set valid_from = (ticket.valid_from).strftime("%d.%m.%Y %H:%M:%S") %}
         {% set valid_to =  (ticket.valid_to).strftime("%d.%m.%Y %H:%M:%S") %}
         {% set valid_to_id =  (ticket.valid_to).strftime("%Y-%m-%d-%H-%M-%S") %}
