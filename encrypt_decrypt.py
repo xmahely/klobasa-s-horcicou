@@ -153,7 +153,7 @@ def psswd_check(input, conf):
     path = re.compile(reg)
     match = re.search(path, input)
     if input in dict:
-        return 1;
+        return 1
     if match:
         return 0
     return 1

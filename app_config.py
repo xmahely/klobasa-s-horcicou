@@ -17,14 +17,16 @@ app.config['UPLOAD_FOLDER'] = fldr.UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 1024 * 1024 * 1024
 app.secret_key = 'U1a2C&5f#kfu#8kU8W5A'
 app.permanent_session_lifetime = timedelta(minutes=30)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://db_user:ghpeworvaozzks@localhost/upb'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://db_user:ghpeworvaozzks@localhost/upb'
 # todo: pri pridávani na server odkomentovať, upb musí byť lowercase!
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://dbadmin:ghpeworvaozzks@localhost/UPB'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://dbadmin:ghpeworvaozzks@localhost/UPB'
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://dbadmin:ghpeworvaozzks@localhost/upb'
 db = SQLAlchemy(app)
 qrcode = QRcode(app)
-socketio = SocketIO(app, async_mode="threading")
-
+# todo: pri pridávani na server musí byť socketio = SocketIO(app)
+# na lokalhoste to musí byť socketio = SocketIO(app, async_mode="threading")
+#socketio = SocketIO(app, async_mode="threading")
+socketio = SocketIO(app)
 # limiter = Limiter(
 #     app,
 #     key_func=get_remote_address,

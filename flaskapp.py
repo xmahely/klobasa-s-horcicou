@@ -1,22 +1,19 @@
 import os
-import time
 from flask import redirect, url_for, render_template, request, flash, send_file, session, make_response
 from werkzeug.exceptions import RequestEntityTooLarge
 from flask_login import current_user, login_user, logout_user, login_required
 import fldr
 import data_handler
 import encrypt_decrypt as ED
-from app_config import app, db, login, socketio, emit
+from app_config import app, db, login, socketio
 from Udb import no_ticket_model, ticket_model
 from Udb.message_model import Message
 from Udb.user_model import User
-from Udb.no_ticket_model import no_ticket
 import random
 import string
 import uuid
 from datetime import datetime, timedelta
 from pytz import utc
-import functools
 from threading import Thread, Event
 thread = Thread()
 thread_stop_event = Event()
@@ -29,7 +26,7 @@ def load_user(user_id):
 with app.app_context():
     # db.drop_all() # toto používať len na premazenia celej db
     db.create_all()
-    # no_ticket_model.create_ticket_types()
+    no_ticket_model.create_ticket_types()
 
 @app.route('/getTickets<int:user_id>')
 def get_tickets(user_id):
@@ -74,12 +71,10 @@ def home():
 @login_required
 def buy_ticket(ticket_type):
     if current_user.is_authenticated:
-
         ticket_model.create_new(current_user.user_id, ticket_type)
         return redirect(url_for('user'))
     else:
         return render_template('login.html')
-
 
 @app.route("/"+''.join(random.choice(string.ascii_lowercase) for i in range(50))+"/buySeason/<int:ticket_type>", methods=["POST"])
 @login_required
@@ -132,8 +127,8 @@ def register():
             flash('This username already exists, try a new one!')
         elif existing_email:
             flash('This email address is already in use!')
-        # elif check == 1:
-        #     flash('Password too weak')
+        elif check == 1:
+            flash('Password too weak')
         elif check == -1:
             flash('Passwords do not match')
         else:
@@ -221,7 +216,6 @@ def logout():
 @app.route("/user")
 def user():
     if current_user.is_authenticated:
-
         return render_template("user_page.html", username=current_user.name, email=current_user.email,
                                p_key=current_user.pub,
                                path_public_key=fldr.UPLOAD_FOLDER + current_user.name + "/id_rsa_public.pub",
@@ -478,6 +472,7 @@ def getUserName(id):
 
 # TODO deactivate user .. delete from Udb and delete system folder
 
+app.jinja_env.globals.update(getUserName=getUserName)
 
 if __name__ == "__main__":
     app.jinja_env.globals.update(getUserName=getUserName)
