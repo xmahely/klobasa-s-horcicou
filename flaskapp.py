@@ -9,6 +9,7 @@ from app_config import app, db, login, socketio
 from Udb import no_ticket_model, ticket_model
 from Udb.message_model import Message
 from Udb.user_model import User
+from Udb.feedback_model import FeedbackMessage
 import random
 import string
 import uuid
@@ -220,9 +221,8 @@ def user():
         return render_template("user_page.html", username=current_user.name, email=current_user.email,
                                p_key=current_user.pub,
                                path_public_key=fldr.UPLOAD_FOLDER + current_user.name + "/id_rsa_public.pub",
-                               path_private_key=fldr.UPLOAD_FOLDER + current_user.name + "/id_rsa.pem",
-                               tickets=get_tickets(current_user.user_id),
-                               season_tickets=get_season_tickets(current_user.user_id))
+                               path_private_key=fldr.UPLOAD_FOLDER + current_user.name + "/id_rsa.pem")
+
     else:
         return redirect(url_for("login"))
 
@@ -377,6 +377,24 @@ def generate_keys():
     else:
         return render_template("generate.html")
 
+@app.route("/feedback", methods=["POST", "GET"])
+@login_required
+def feedback():
+    if request.method == "POST":
+        subject = request.form.get('subject', "noSubject")
+        message = request.form.get('message', "")
+        FeedbackMessage.create(current_user.user_id, getUserName(current_user.user_id), subject, message)
+        return render_template("feedback.html")
+    else:
+        return render_template("feedback.html")
+
+@app.route("/feedbackDisplay")
+@login_required
+def feedbackDisplay():
+        feedback = FeedbackMessage.selectFeedbackMessages()
+        print(feedback[0].sender_ID)
+
+        return render_template("feedbackDisplay.html",feedbackMessages=feedback)
 
 @app.route("/nope")
 def nope():

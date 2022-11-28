@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Feedback{% endblock %}
+{% block content %}
+{% for message in get_flashed_messages() %}
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+  </button>
+  <strong>Warning! </strong>{{message}}
+</div>
+{% endfor %}
+
+<head>
+<style>
+ .form-group{
+  padding: 10px;
+ }
+  
+</style>
+</head>
+<body class="bg-dark">
+<section class="gradient-custom">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-4 mt-5 bg-light rounded">
+        <h1 class="text-center font-weight-bold text-primary">Contact Us</h1>
+        <hr class="bg-light">
+        <h5 class="text-center text-success"></h5>
+        <form action="" method="post" id="form-box" class="p-2">
+
+          <div class="form-group input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text"><i class="fas fa-at"></i></span>
+            </div>
+            <input type="text" name="subject" class="form-control" placeholder="Enter subject" required>
+          </div>
+          <div class="form-group input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text"><i class="fas fa-comment-alt"></i></span>
+            </div>
+            <textarea name="message" id="message" class="form-control" placeholder="Write your message" cols="30" rows="4" required></textarea>
+          </div>
+          <div class="form-group">
+            <input type="submit" name="submit" id="submit" class="btn btn-primary btn-block" value="Send">
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+</body>
+{% endblock %}
