@@ -221,8 +221,9 @@ def user():
         return render_template("user_page.html", username=current_user.name, email=current_user.email,
                                p_key=current_user.pub,
                                path_public_key=fldr.UPLOAD_FOLDER + current_user.name + "/id_rsa_public.pub",
-                               path_private_key=fldr.UPLOAD_FOLDER + current_user.name + "/id_rsa.pem")
-
+                               path_private_key=fldr.UPLOAD_FOLDER + current_user.name + "/id_rsa.pem",
+                               tickets=get_tickets(current_user.user_id),
+                               season_tickets=get_season_tickets(current_user.user_id))
     else:
         return redirect(url_for("login"))
 
