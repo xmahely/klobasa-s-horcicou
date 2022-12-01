@@ -13,9 +13,9 @@ import re
 
 
 def base64Encoding(input):
-  dataBase64 = base64.b64encode(input)
-  dataBase64P = dataBase64.decode("UTF-8")
-  return dataBase64P
+    dataBase64 = base64.b64encode(input)
+    dataBase64P = dataBase64.decode("UTF-8")
+    return dataBase64P
 
 
 def base64Decoding(input):
@@ -27,7 +27,6 @@ def generate_random_key():
 
 
 def generate_rsa_pair():
-
     keygen = RSA.generate_private_key(
         public_exponent=65537,
         key_size=2048
@@ -60,7 +59,6 @@ def AES_decrypt(input, nonce, auth, key):
 
 
 def encrypt_file(file_text, public_key):
-
     symmetric_key = generate_random_key()
     fernet = Fernet(symmetric_key)
 
@@ -80,12 +78,11 @@ def encrypt_file(file_text, public_key):
     encrypted, auth, nonce = AES_encrypt(output_header, aes_key)
 
     output = base64Encoding(aes_key) + "-----" + base64Encoding(auth) \
-             + "-----"+ base64Encoding(nonce) + "-----" + base64Encoding(encrypted)
+             + "-----" + base64Encoding(nonce) + "-----" + base64Encoding(encrypted)
     return output
 
 
 def decrypt_file(file_text, private_key):
-
     tmp = file_text.split("-----")
     aes_key = base64Decoding(tmp[0])
     auth = base64Decoding(tmp[1])
@@ -94,7 +91,7 @@ def decrypt_file(file_text, private_key):
 
     del tmp
 
-    result = AES_decrypt(text,nonce,auth,aes_key)
+    result = AES_decrypt(text, nonce, auth, aes_key)
 
     split = result.split(str.encode("/!/"))
 
@@ -131,25 +128,24 @@ def read_public_key(filename):
 
 def psswd_hash(input):
     salt = bcrypt.gensalt()
-    hash = bcrypt.hashpw(input.encode(),salt)
+    hash = bcrypt.hashpw(input.encode(), salt)
     return hash, salt
 
 
-def authenticate(salt,psswd, db_psswd):
-    auth = bcrypt.hashpw(str.encode(psswd),str.encode(salt))
+def authenticate(salt, psswd, db_psswd):
+    auth = bcrypt.hashpw(str.encode(psswd), str.encode(salt))
     if auth.decode() != db_psswd:
         return -1
     return 0
 
 
 def psswd_check(input, conf):
-
     dict = data_handler.read_rockyou()
     if conf != input:
         return -1
     if len(input) < 6:
         return 1
-    reg = "^[A-Za-z0-9_-]*$"
+    reg = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!#%*?&]*$"
     path = re.compile(reg)
     match = re.search(path, input)
     if input in dict:

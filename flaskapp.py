@@ -145,7 +145,7 @@ def register():
                 # TODO toto nech neni warning
                 # namalo by sa stat ze existuje uz folder kedze username je unique
                 flash('Registration successful', '')
-                return render_template('register.html')
+                return render_template('login.html')
             except Exception as e:
                 return render_template("register.html")
     return render_template("register.html")
@@ -481,5 +481,5 @@ if __name__ == "__main__":
         db.create_all()
 
     app.debug = True
-    # app.run(host='0.0.0.0')
+    #app.run(host='0.0.0.0')
     socketio.run(app)
